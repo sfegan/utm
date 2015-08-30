@@ -55,6 +55,16 @@
  *
  *****************************************************************************/
 
+/* 
+
+   Version history:
+   
+   1.0 - 2005-07-30 - Initial complete version, put on GitHub 2015-08-29
+   1.1 - 2015-08-30 - Fixed error in calculation of sin(8phi), add some comments
+                      to test table output.
+
+*/
+
 #if defined(__cplusplus)
 #include<cmath>
 #else
@@ -181,7 +191,7 @@ void geographic_to_tm(double a, double e2, double k0,
   double s4phi = 2.0*s2phi*c2phi;
   double c4phi = c2phi*c2phi-s2phi*s2phi;
   double s6phi = s4phi*c2phi+s2phi*c4phi;
-  double s8phi = 2.0*s2phi*c2phi;
+  double s8phi = 2.0*s4phi*c4phi;
 #endif
 
   double S = Ap*phi - Bp*s2phi + Cp*s4phi - Dp*s6phi + Ep*s8phi;
@@ -274,7 +284,7 @@ void tm_to_geographic(double a, double e2, double k0,
       double s4phi = 2.0*s2phi*c2phi;
       double c4phi = c2phi*c2phi-s2phi*s2phi;
       double s6phi = s4phi*c2phi+s2phi*c4phi;
-      double s8phi = 2.0*s2phi*c2phi;
+      double s8phi = 2.0*s4phi*c4phi;
 #endif
       
       double S = Ap*phi - Bp*s2phi + Cp*s4phi - Dp*s6phi + Ep*s8phi;
@@ -689,6 +699,8 @@ int main()
   double E;
   double N;
 
+  std::cout << "Tests transformations to/from UTM grid (reproduces Table 2-11 of DMTAM 8358.2)\n\n";
+
   // ----------------------------------------------
   // TEST OF FORWARD GOING UTM ELLIPSOID CONVERSION
   // ----------------------------------------------
@@ -803,10 +815,12 @@ int main()
   write_entry(std::cout, lat_rad, lon_rad, N, E);
 
   std::cout << std::endl;
-
+  
   // ----------------------------------------------
   // TEST OF FORWARD GOING UPS ELLIPSOID CONVERSION
   // ----------------------------------------------
+
+  std::cout << "Tests transformations to/from UPS grid (reproduces Table 3-7 of DMTAM 8358.2)\n\n";
 
   a = 6378137.0;
   e2 = 0.006694379990;
