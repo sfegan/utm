@@ -445,7 +445,7 @@ void ps_to_geographic(double a, double e2, double k0,
       double s4chi = 2.0*s2chi*c2chi;
       double c4chi = c2chi*c2chi-s2chi*s2chi;
       double s6chi = s4chi*c2chi+s2chi*c4chi;
-      double s8chi = 2.0*s2chi*c2chi;
+      double s8chi = 2.0*s4chi*c4chi;
       phi = chi + Abar*s2chi + Bbar*s4chi + Cbar*s6chi + Dbar*s8chi;
 #endif
 
