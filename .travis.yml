@@ -1,0 +1,4 @@
+sudo: false
+script:
+ - g++ -o utm -DELLIPSE_TEST_MAIN datum.cpp utm.cpp
+ - ./utm
