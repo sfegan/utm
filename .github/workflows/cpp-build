@@ -1,0 +1,31 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        cpp: [g++, clang++]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: compile
+      shell: bash
+      run: -
+        ${CPP} -o utm_ellipse -DELLIPSE_TEST_MAIN datum.cpp utm.cpp
+        ${CPP} -o utm_sphere -DSPHERE_TEST_MAIN datum.cpp utm.cpp
+      env:
+        CPP: ${{ matrix.cpp }}
+    - name: ellipse_test
+      run: ./utm_ellipse
+    - name: sphere_test
+      run: ./utm_sphere
