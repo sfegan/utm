@@ -1,19 +1,19 @@
 /* -*-mode:c++; mode:font-lock;-*- */
 
 /******************************************************************************
- * 
+ *
  * CONVERT COORDINATES BETWEEN LATITUDE/LONGITUDE AND THE UTM/UPS GRIDS
  *
  * Stephen Fegan, July 2005, sfegan@gmail.com
  *
- * These conversion routines are a C/C++ implementation of the algorithms 
+ * These conversion routines are a C/C++ implementation of the algorithms
  * described in the Defense Mapping Agency Technical Manual (DMATM) 8358.2
  * which is available from the US National Geospatial Mapping Agency.
  * At time of writing it could be downloaded at:
  *
  * http://earth-info.nga.mil/GandG/coordsys/csat_pubs.html
  *
- * A number of alternative conversion routines are available on the Web. Those 
+ * A number of alternative conversion routines are available on the Web. Those
  * that I've seen are (ultimately) based on John Snyder's algorithm, presented
  * in "MAP PROJECTIONS; A WORKING MANUAL", USGS Professional Paper 1395. My
  * reading of that work suggests that Snyder's algorithms was derived as an
@@ -23,16 +23,16 @@
  * The "main" at the end of this file reproduces the worked examples in the
  * DMA document (section 2-11, page 2-7) to the accuracy of the equations
  * (0.01 meter on the grid and 0.001 arc second for geographic coordinates).
- * However, I DO NOT GIVE ANY ASSURANCES THAT THE OUTPUT OF THIS CODE IS 
+ * However, I DO NOT GIVE ANY ASSURANCES THAT THE OUTPUT OF THIS CODE IS
  * CORRECT. If you need this code for mission critical applications it
  * is your responsibility to ensure its accuracy to the degree you require.
  *
  * The variable names may seem cryptic, but they were chosen to reflect the
  * DMA algorithm and to make the code writing easier.
  *
- * There only adjustable parameter is the tolerance to which the iteration 
- * to find the true meridional distance is performed in the reverse 
- * calculation. It is set at 0.001 meter which exceeds the accuracy the DMA 
+ * There only adjustable parameter is the tolerance to which the iteration
+ * to find the true meridional distance is performed in the reverse
+ * calculation. It is set at 0.001 meter which exceeds the accuracy the DMA
  * claims across the range of applicability of the series. A lower value is
  * only meaningful if you are working close to the meridian.
  *
@@ -40,10 +40,10 @@
  * modification under a C compiler. The "main" test code will need some
  * reworking to compile under C.
  *
- * I do not regard this work is anything other than a simple translation of 
- * the DMA algorithms, which were released as "Distribution Unlimited". 
- * Although I am a strong supporter of the GPL and free software, I do not 
- * think it would be appropriate to release this code under the GPL since 
+ * I do not regard this work is anything other than a simple translation of
+ * the DMA algorithms, which were released as "Distribution Unlimited".
+ * Although I am a strong supporter of the GPL and free software, I do not
+ * think it would be appropriate to release this code under the GPL since
  * all the hard work was done by the DMA and was unconditionally released to
  * the public. Therefore this code is released into the public domain.
  *
@@ -60,7 +60,7 @@
 
 #include "datum.h"
 
-#define ECC2(f) (2.0*(1.0-1.0/(f))/(f)) /* Caution: Uses f twice! */
+#define ECC2(f) ((2. - 1./(f))/(f)) /* Caution: Uses f twice! */
 #define NUMOF(x) (sizeof(x)/sizeof(*x))
 
 static StandardEllipse reference_ellipse[] = {
@@ -76,8 +76,8 @@ static StandardEllipse reference_ellipse[] = {
   { "Everest, India 1830",     "EA", 6377276.345, ECC2(300.8017) },
   { "Everest, India 1956",     "EC", 6377301.243, ECC2(300.8017) },
   { "Everest, Pakistan",       "EF", 6377309.613, ECC2(300.8017) },
-  { "Everest, W. Malaysia and Singapore 1948", 
-                               "EE", 6377304.063, ECC2(300.8017) },  
+  { "Everest, W. Malaysia and Singapore 1948",
+                               "EE", 6377304.063, ECC2(300.8017) },
   { "Everest, W. Malaysia 1969",
                                "ED", 6377295.664, ECC2(300.8017) },
   { "Geodetic Reference System 1980",
@@ -98,9 +98,9 @@ static DatumTransformationParameters datum_transformation[] = {
 
   /* APPENDIX B */
   /* LOCAL GEODETIC DATUMS RELATED TO WGS84 THROUGH SATELLITE TIES */
-  
+
   /* Continent: AFRICA */
-  
+
   { "ADINDAN, Mean Solution (Ethiopia and Sudan)", "ADI-M",
                                                 ELLIPSE_CD, -166,  -15,  204 },
   { "ADINDAN, Burkina Faso",           "ADI-E", ELLIPSE_CD, -118,  -14,  218 },
@@ -153,7 +153,7 @@ static DatumTransformationParameters datum_transformation[] = {
   { "VOIROL 1960, Algeria",            "VOR",   ELLIPSE_CD, -123, -206,  219 },
 
   /* Continent: ASIA */
-  
+
   { "AIN EL ABD 1970, Bahrain Island", "AIN-A", ELLIPSE_IN, -150, -250,   -1 },
   { "AIN EL ABD 1970, Saudi Arabia",   "AIN-B", ELLIPSE_IN, -143, -236,    7 },
   { "DJAKARTA (BATAVIA), Sumatra (Indonesia)",
@@ -173,7 +173,7 @@ static DatumTransformationParameters datum_transformation[] = {
 
   { "INDONESIAN 1974, Indonesia",      "IDN",   ELLIPSE_ID,  -24,  -15,    5 },
   { "KANDAWALA, Sri Lanka",            "KAN",   ELLIPSE_EA,  -97,  787,   86 },
-  { "KERTAU 1948, West Malaysia and Singapore",  
+  { "KERTAU 1948, West Malaysia and Singapore",
                                        "KEA",   ELLIPSE_EE,  -11,  851,    5 },
   { "KOREAN GEODETIC SYSTEM 1995, South Korea",
                                        "KGS",   ELLIPSE_WE,    0,    0,    0 },
@@ -200,7 +200,7 @@ static DatumTransformationParameters datum_transformation[] = {
                                        "AUA",   ELLIPSE_AN, -133,  -48,  148 },
   { "AUSTRALIAN GEODETIC 1984, Australia and Tasmania",
                                        "AUG",   ELLIPSE_AN, -134,  -48,  149 },
-  
+
   /* Continent: EUROPE */
 
   { "CO-ORDINATE SYSTEM 1937 OF ESTONIA, Estonia",
@@ -256,8 +256,8 @@ static DatumTransformationParameters datum_transformation[] = {
   { "ROME 1940, Sardinia",             "MOD",   ELLIPSE_IN, -225,  -65,    9 },
   { "S-42 (PULKOVO 1942), Hungary",    "SPK-A", ELLIPSE_KA,   28, -121,  -77 },
   { "S-42 (PULKOVO 1942), Poland",     "SPK-B", ELLIPSE_KA,   23, -124,  -82 },
-  
-  { "S-42 (PULKOVO 1942), Czechoslovakia", 
+
+  { "S-42 (PULKOVO 1942), Czechoslovakia",
                                        "SPK-C", ELLIPSE_KA,   26, -121,  -78 },
   { "S-42 (PULKOVO 1942), Latvia",     "SPK-D", ELLIPSE_KA,   24, -124,  -82 },
   { "S-42 (PULKOVO 1942), Kazakhstan", "SPK-E", ELLIPSE_KA,   15, -130,  -84 },
@@ -311,7 +311,7 @@ static DatumTransformationParameters datum_transformation[] = {
   { "NORTH AMERICAN 1927, Caribbean (Antigua Island, Barbados, Barbuda, "
     "Caicos Islands, Cuba, Dominican Republic, Grand Cayman, Jamaica and "
     "Turks Islands)",                  "NAS-P", ELLIPSE_CC,   -3,  142,  183 },
-  
+
   { "NORTH AMERICAN 1927, Central America (Belize, Costa Rica, El Salvador, "
     "Guatemala, Honduras and Nicaragua)",
                                        "NAS-N", ELLIPSE_CC,    0,  125,  194 },
@@ -368,7 +368,7 @@ static DatumTransformationParameters datum_transformation[] = {
   { "SOUTH AMERICAN 1969, Brazil",     "SAN-C", ELLIPSE_SA,  -60,   -2,  -41 },
   { "SOUTH AMERICAN 1969, Chile",      "SAN-D", ELLIPSE_SA,  -75,   -1,  -44 },
   { "SOUTH AMERICAN 1969, Colombia",   "SAN-E", ELLIPSE_SA,  -44,    6,  -36 },
-  
+
   { "SOUTH AMERICAN 1969, Ecuador (Excluding Galapagos Islands)",
                                        "SAN-F", ELLIPSE_SA,  -48,    3,  -44 },
   { "SOUTH AMERICAN 1969, Baltra and Galapagos Islands",
@@ -376,7 +376,7 @@ static DatumTransformationParameters datum_transformation[] = {
   { "SOUTH AMERICAN 1969, Guyana",     "SAN-G", ELLIPSE_SA,  -53,    3,  -47 },
   { "SOUTH AMERICAN 1969, Paraguay",   "SAN-H", ELLIPSE_SA,  -61,    2,  -33 },
   { "SOUTH AMERICAN 1969, Peru",       "SAN-I", ELLIPSE_SA,  -58,    0,  -44 },
-  { "SOUTH AMERICAN 1969, Trinidad and Tobago", 
+  { "SOUTH AMERICAN 1969, Trinidad and Tobago",
                                        "SAN-K", ELLIPSE_SA,  -45,   12,  -33 },
   { "SOUTH AMERICAN 1969, Venezuela",  "SAN-L", ELLIPSE_SA,  -45,    8,  -33 },
 
@@ -385,7 +385,7 @@ static DatumTransformationParameters datum_transformation[] = {
   { "ZANDERIJ, Suriname",              "ZAN",   ELLIPSE_IN, -265,  120, -358 },
 
   /* Continent: ATLANTIC OCEAN */
-  
+
   { "ANTIGUA ISLAND ASTRO 1943, Antigua and Leeward Islands",
                                        "AIA",   ELLIPSE_CD, -270,   13,   62 },
   { "ASCENSION ISLAND 1958, Ascension Island",
@@ -414,14 +414,14 @@ static DatumTransformationParameters datum_transformation[] = {
                                        "LCF",   ELLIPSE_CC,   42,  124,  147 },
   { "MONTSERRAT ISLAND ASTRO 1958, Montserrat and Leeward Islands",
                                        "ASM",   ELLIPSE_CD,  174,  359,  365 },
-  { "NAPARIMA BWI, Trinidad and Tobago", 
+  { "NAPARIMA BWI, Trinidad and Tobago",
                                        "NAP",   ELLIPSE_IN,  -10,  375,  165 },
   { "OBSERVATORIO METEOROLOGICO 1939, Corvo and Flores Islands (Azores)",
                                        "FLO",   ELLIPSE_IN, -425, -169,   81 },
-  { "PICO DE LAS NIEVES, Canary Islands", 
+  { "PICO DE LAS NIEVES, Canary Islands",
                                        "PLN",   ELLIPSE_IN, -307,  -92,  127 },
 
-  { "PORTO SANTO, Porto Santo and Madeira Islands", 
+  { "PORTO SANTO, Porto Santo and Madeira Islands",
                                        "POS",   ELLIPSE_IN, -499, -249,  314 },
   { "PUERTO RICO, Puerto Rico and Virgin Islands",
                                        "PUR",   ELLIPSE_CC,   11,   72, -101 },
@@ -497,7 +497,7 @@ static DatumTransformationParameters datum_transformation[] = {
   { "OLD HAWAIIAN, Kauai",             "OHI-B", ELLIPSE_IN,  185, -233, -337 },
   { "OLD HAWAIIAN, Maui",              "OHI-C", ELLIPSE_IN,  205, -233, -355 },
   { "OLD HAWAIIAN, Oahu",              "OHI-D", ELLIPSE_IN,  198, -226, -347 },
-  { "PITCAIRN ASTRO 1967, Pitcairn Island", 
+  { "PITCAIRN ASTRO 1967, Pitcairn Island",
                                        "PIT",   ELLIPSE_IN,  185,  165,   42 },
   { "SANTO (DOS) 1965, Espirito Santo Island",
                                        "SAE",   ELLIPSE_IN,  170,   42,   84 },
@@ -521,7 +521,7 @@ static DatumTransformationParameters datum_transformation[] = {
   { "GUNUNG SEGARA, Kalimantan (Indonesia)",
                                        "GSE",   ELLIPSE_BR, -403,  684,   41 },
   { "HERAT NORTH, Afghanistan",        "HEN",   ELLIPSE_IN, -333, -222,  114 },
-  
+
   { "HERMANNSKOGEL, Yugoslavia (Prior to 1990) Slovenia, Croatia, Bosnia "
     "and Herzegovina and Serbia",      "HER",   ELLIPSE_BR,  682, -203,  480 },
   { "INDIAN, Pakistan",                "IND-P", ELLIPSE_EF,  283,  682,  231 },
