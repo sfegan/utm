@@ -6,6 +6,11 @@
  *
  * Stephen Fegan, July 2005, sfegan@gmail.com
  *
+ * 2025-12-21: The primary conversion functions have been replaced with
+ * versions based on Karney 2011 and Kawase 2011, 2021. The original
+ * version based on the DMA algorithms has been obsoleted but retained for
+ * reference.
+ * 
  * These conversion routines are a C/C++ implementation of the algorithms 
  * described in the Defense Mapping Agency Technical Manual (DMATM) 8358.2
  * which is available from the US National Geospatial Mapping Agency.
@@ -62,7 +67,8 @@
    1.0 - 2005-07-30 - Initial complete version, put on GitHub 2015-08-29
    1.1 - 2015-08-30 - Fixed error in calculation of sin(8phi), add some comments
                       to test table output.
-
+   2.0 - 2025-12-21 - Obsoleted the DMATM based functions in favor of those based
+                      on Karney 2011 and Kawase 2011, 2021.
 */
 
 #if defined(__cplusplus)
@@ -76,6 +82,13 @@
 #endif
 
 #include "utm.h"
+
+//    .d8888. d8888b. db   db d88888b d8888b. d88888b 
+//    88'  YP 88  `8D 88   88 88'     88  `8D 88'     
+//    `8bo.   88oodD' 88ooo88 88ooooo 88oobY' 88ooooo 
+//      `Y8b. 88~~~   88~~~88 88~~~~~ 88`8b   88~~~~~ 
+//    db   8D 88      88   88 88.     88 `88. 88.     
+//    `8888Y' 88      YP   YP Y88888P 88   YD Y88888P 
 
 /* 
    The exact equations for the sphere are from "MAP PROJECTIONS; A WORKING 
@@ -144,13 +157,168 @@ void ps_to_geographic_sphere(double R, double k0,
     }  
 }
 
+//    db   dD  .d8b.  d8888b. d8b   db d88888b db    db      .d888b.  
+//    88 ,8P' d8' `8b 88  `8D 888o  88 88'     `8b  d8'      8P   8D  
+//    88,8P   88ooo88 88oobY' 88V8o 88 88ooooo  `8bd8'       `Vb d8'  
+//    88`8b   88~~~88 88`8b   88 V8o88 88~~~~~    88          d88C dD 
+//    88 `88. 88   88 88 `88. 88  V888 88.        88         C8' d8D  
+//    YP   YD YP   YP 88   YD VP   V8P Y88888P    YP         `888P Yb 
+//                                                                    
+//                                                                    
+//    db   dD  .d8b.  db   d8b   db  .d8b.  .d8888. d88888b           
+//    88 ,8P' d8' `8b 88   I8I   88 d8' `8b 88'  YP 88'               
+//    88,8P   88ooo88 88   I8I   88 88ooo88 `8bo.   88ooooo           
+//    88`8b   88~~~88 Y8   I8I   88 88~~~88   `Y8b. 88~~~~~           
+//    88 `88. 88   88 `8b d8'8b d8' 88   88 db   8D 88.               
+//    YP   YD YP   YP  `8b8' `8d8'  YP   YP `8888Y' Y88888P           
+
+namespace {
+	inline double poly4(double x, double c0, double c1, double c2, double c3, double c4) {
+		return c0 + x*(c1 + x*(c2 + x*(c3 + x*c4)));
+	}
+
+  inline double SQR(double x) {
+    return x*x;
+  }
+}
+
+void geographic_to_tm(double a, double e2, double k0,
+		      double lon_mer, double FN, double FE,
+		      double lat_rad, double lon_rad,
+		      double* N, double* E)
+{
+	// See Karney 2011 and Kawase 2011, 2021
+	// https://arxiv.org/abs/1002.1417
+	// http://www.gsi.go.jp/common/000062452.pdf
+	// http://www.gsi.go.jp/common/000065826.pdf
+
+	double f = 1.-sqrt(1.-e2);
+	double n = f/(2.-f);
+	double A = a/(1.+n)*poly4(n*n, 1., 1./4, 1./64, 1./256, 25./16384);
+
+	double a1 = poly4(n, 0, 1./2,  -2./3,   5./16,       41./180);
+	double a2 = poly4(n, 0,    0, 13./48,   -3./5,     557./1440);
+	double a3 = poly4(n, 0,    0,      0, 61./240,     -103./140);
+	double a4 = poly4(n, 0,    0,      0,       0, 49561./161280);
+
+	double sin_phi = sin(lat_rad);
+	double t_factor = 2.*sqrt(n)/(1.+n);
+	double t = sinh(atanh(sin_phi) - t_factor*atanh(t_factor*sin_phi));
+	double xi = atan(t/cos(lon_rad-lon_mer));
+	double eta = atanh(sin(lon_rad-lon_mer)/sqrt(1.+t*t));
+
+	*E = FE + k0*A*(eta + a1*cos(2*xi)*sinh(2*eta)
+		+ a2*cos(4*xi)*sinh(4*eta) + a3*cos(6*xi)*sinh(6*eta)
+		+ a4*cos(8*xi)*sinh(8*eta));
+	*N = FN + k0*A*(xi + a1*sin(2*xi)*cosh(2*eta)
+		+ a2*sin(4*xi)*cosh(4*eta) + a3*sin(6*xi)*cosh(6*eta)
+		+ a4*sin(8*xi)*cosh(8*eta));
+}
+
+void geographic_to_tm_with_convergence_and_scale(
+					double a, double e2, double k0,
+		      double lon_mer, double FN, double FE,
+		      double lat_rad, double lon_rad,
+		      double* N, double* E, double* grid_convergence_rad, double* scale)
+{
+	// See Karney 2011 and Kawase 2011, 2021
+	// https://arxiv.org/abs/1002.1417
+	// http://www.gsi.go.jp/common/000062452.pdf
+	// http://www.gsi.go.jp/common/000065826.pdf
+
+	double f = 1.-sqrt(1.-e2);
+	double n = f/(2.-f);
+	double A = a/(1.+n)*poly4(n*n, 1., 1./4, 1./64, 1./256, 25./16384);
+
+	double a1 = poly4(n, 0, 1./2,  -2./3,   5./16,       41./180);
+	double a2 = poly4(n, 0,    0, 13./48,   -3./5,     557./1440);
+	double a3 = poly4(n, 0,    0,      0, 61./240,     -103./140);
+	double a4 = poly4(n, 0,    0,      0,       0, 49561./161280);
+
+	double sin_phi = sin(lat_rad);
+	double t_factor = 2.*sqrt(n)/(1.+n);
+	double t = sinh(atanh(sin_phi) - t_factor*atanh(t_factor*sin_phi));
+	double xi = atan(t/cos(lon_rad-lon_mer));
+	double eta = atanh(sin(lon_rad-lon_mer)/sqrt(1.+t*t));
+
+	*E = FE + k0*A*(eta + a1*cos(2*xi)*sinh(2*eta)
+		+ a2*cos(4*xi)*sinh(4*eta) + a3*cos(6*xi)*sinh(6*eta)
+		+ a4*cos(8*xi)*sinh(8*eta));
+	*N = FN + k0*A*(xi + a1*sin(2*xi)*cosh(2*eta)
+		+ a2*sin(4*xi)*cosh(4*eta) + a3*sin(6*xi)*cosh(6*eta)
+		+ a4*sin(8*xi)*cosh(8*eta));
+
+	double sigma = 1 + 2*(a1*cos(2*xi)*cosh(2*eta)
+		+ 2.*a2*cos(4*xi)*cosh(4*eta) + 3.*a3*cos(6*xi)*cosh(6*eta)
+		+ 4.*a4*cos(8*xi)*cosh(8*eta));
+	double tau = 2*(a1*sin(2*xi)*sinh(2*eta)
+		+ 2.*a2*sin(4*xi)*sinh(4*eta) + 3.*a3*sin(6*xi)*sinh(6*eta)
+		+ 4.*a4*sin(8*xi)*sinh(8*eta));
+
+	*grid_convergence_rad = atan((tau*sqrt(1+t*t)+sigma*t*tan(lon_rad-lon_mer))/
+		(sigma*sqrt(1+t*t)-tau*t*tan(lon_rad-lon_mer)));
+	*scale = k0*A/a*sqrt((1 + SQR((1-n)/(1+n)*tan(lat_rad)))*(sigma*sigma+tau*tau)/
+		(t*t+SQR(cos(lon_rad-lon_mer))));
+}
+
+void tm_to_geographic(double a, double e2, double k0,
+		      double lon_mer, double FN, double FE,
+		      double N, double E,
+		      double* lat_rad, double* lon_rad)
+{
+	// See Karney 2011 and Kawase 2011, 2021
+	// https://arxiv.org/abs/1002.1417
+	// http://www.gsi.go.jp/common/000062452.pdf
+	// http://www.gsi.go.jp/common/000065826.pdf
+
+	double f = 1.-sqrt(1.-e2);
+	double n = f/(2.-f);
+	double A = a/(1.+n)*poly4(n*n, 1., 1./4, 1./64, 1./256, 25./16384);
+
+	double b1 = poly4(n, 0, 1./2,  -2./3,  37./96,       -1./360);
+	double b2 = poly4(n, 0,    0,  1./48,   1./15,    -437./1440);
+	double b3 = poly4(n, 0,    0,      0, 17./480,      -37./840);
+	double b4 = poly4(n, 0,    0,      0,       0,  4397./161280);
+
+	double xi = (N - FN)/(k0*A);
+	double eta = (E - FE)/(k0*A);
+
+	double xi_prime = xi - (b1*sin(2*xi)*cosh(2*eta)
+		+ b2*sin(4*xi)*cosh(4*eta) + b3*sin(6*xi)*cosh(6*eta)
+		+ b4*sin(8*xi)*cosh(8*eta));
+
+	double eta_prime = eta - (b1*cos(2*xi)*sinh(2*eta)
+		+ b2*cos(4*xi)*sinh(4*eta) + b3*cos(6*xi)*sinh(6*eta)
+		+ b4*cos(8*xi)*sinh(8*eta));
+
+	double d1 = poly4(n, 0,   2.,  -2./3,     -2.,       116./45);
+	double d2 = poly4(n, 0,    0,   7./3,   -8./5,      -227./45);
+	double d3 = poly4(n, 0,    0,      0,  56./15,      -136./35);
+	double d4 = poly4(n, 0,    0,      0,       0,     4279./630);
+
+	double chi = asin(sin(xi_prime)/cosh(eta_prime));
+
+	*lat_rad = chi + d1*sin(2*chi) + d2*sin(4*chi) + d3*sin(6*chi) + d4*sin(8*chi);
+	*lon_rad = lon_mer + atan(sinh(eta_prime)/cos(xi_prime));
+}
+
+//    d8888b. .88b  d88.  .d8b.  d888888b .88b  d88. 
+//    88  `8D 88'YbdP`88 d8' `8b `~~88~~' 88'YbdP`88 
+//    88   88 88  88  88 88ooo88    88    88  88  88 
+//    88   88 88  88  88 88~~~88    88    88  88  88 
+//    88  .8D 88  88  88 88   88    88    88  88  88 
+//    Y8888D' YP  YP  YP YP   YP    YP    YP  YP  YP 
+
 /* 
    The approximate series expansion equations for an ellipsoid are from 
    "The Universal Grids", Defense Mapping Agency Technical Manual 
    (DMATM) 8358.2
+
+   These functions are obdoleted by those based on the algorithms of
+   Karney and Kawase given above, but are retained for reference.
 */
 
-void geographic_to_tm(double a, double e2, double k0, 
+void dmatm_geographic_to_tm(double a, double e2, double k0, 
 		      double lon_mer, double FN, double FE,
 		      double lat_rad, double lon_rad,
 		      double* N, double* E)
@@ -236,9 +404,10 @@ void geographic_to_tm(double a, double e2, double k0,
   *N = FN + T1 + dl2*T2 + dl4*T3 + dl6*T4 + dl8*T5;
   *E = FE + dl*(T6 + dl2*T7 + dl4*T8 + dl6*T9);
 }
+
 #include<iostream>
 #include<iomanip>
-void tm_to_geographic(double a, double e2, double k0, 
+void dmatm_tm_to_geographic(double a, double e2, double k0, 
 		      double lon_mer, double FN, double FE,
 		      double N, double E,
 		      double* lat_rad, double* lon_rad)
@@ -292,11 +461,11 @@ void tm_to_geographic(double a, double e2, double k0,
       double T1 = S*k0;
 
 #if 0
-      std::cout << std::fixed << "ITERATE: "  
-		<< std::setw(10) << std::setprecision(5) << fabs(T1-y) << ' '
-		<< std::setprecision(10) << phi*180/M_PI << ' ' 
-		<< std::setprecision(3) << y << ' ' 
-		<< std::setprecision(3) << T1 << std::endl;
+      cout << fixed << "ITERATE: "  
+		<< setw(10) << setprecision(5) << fabs(T1-y) << ' '
+		<< setprecision(10) << phi*180/M_PI << ' ' 
+		<< setprecision(3) << y << ' ' 
+		<< setprecision(3) << T1 << endl;
 #endif     
  
       if(fabs(T1-y) < TM_TO_GEOGRAPHIC_TOLERANCE_M)break;
@@ -939,7 +1108,6 @@ int main()
 		    << x[ilon];
 	}
       std::cout << std::endl;
-
       for(unsigned ilon=0;ilon<10;ilon++)
 	{
 	  if(ilon)std::cout << ' ';
@@ -992,11 +1160,11 @@ int main(int argc, char** argv)
       geographic_to_grid(a, e2, lat, lon, &zone, &hemi, &N, &E);
       
       std::cout << std::fixed 
-		<< std::setw(10) << std::setprecision(2) << N << "   "
-		<< std::setw(10) << std::setprecision(2) << E << "   "
-		<< std::setw(2) << (unsigned)zone << "   "
-		<< std::setw(2) << (unsigned)hemi 
-		<< std::endl;
+		    << std::setw(10) << std::setprecision(2) << N << "   "
+		    << std::setw(10) << std::setprecision(2) << E << "   "
+    		<< std::setw(2) << (unsigned)zone << "   "
+    		<< std::setw(2) << (unsigned)hemi 
+    		<< std::endl;
 
       *stream >> lon >> lat;
     }

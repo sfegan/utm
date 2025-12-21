@@ -6,6 +6,11 @@
  *
  * Stephen Fegan, July 2005, sfegan@gmail.com
  *
+ * 2025-12-21: The primary conversion functions have been replaced with
+ * versions based on Karney 2011 and Kawase 2011, 2021. The original
+ * version based on the DMA  algorithms has been obsoleted but retained for
+ * reference.
+ *
  * These conversion routines are a C/C++ implementation of the algorithms 
  * described in the Defense Mapping Agency Technical Manual (DMATM) 8358.2
  * which is available from the US National Geospatial Mapping Agency.
@@ -116,10 +121,26 @@ void ps_to_geographic_sphere(double R, double k0,
 #define TM_TO_GEOGRAPHIC_TOLERANCE_M 0.001
 #endif
 
+void dmatm_geographic_to_tm(double a, double e2, double k0, 
+		      double lon_mer, double FN, double FE,
+		      double lat_rad, double lon_rad,
+		      double* N, double* E);
+
+void dmatm_tm_to_geographic(double a, double e2, double k0, 
+		      double lon_mer, double FN, double FE,
+		      double N, double E,
+		      double* lat_rad, double* lon_rad);
+
 void geographic_to_tm(double a, double e2, double k0, 
 		      double lon_mer, double FN, double FE,
 		      double lat_rad, double lon_rad,
 		      double* N, double* E);
+
+void geographic_to_tm_with_convergence_and_scale(
+					double a, double e2, double k0,
+		      double lon_mer, double FN, double FE,
+		      double lat_rad, double lon_rad,
+		      double* N, double* E, double* grid_convergence_rad, double* scale);
 
 void tm_to_geographic(double a, double e2, double k0, 
 		      double lon_mer, double FN, double FE,
