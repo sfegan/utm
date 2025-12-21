@@ -4,7 +4,7 @@ This repository provides a set of C++ routines to convert coordinates between la
 
 __Prior to 2025-12-21__ these were based on the series expansion provided by the US Defense Mapping Agency Technical Manual 8358.2.
 
-__After 2025-12-21__ the UTM routines use an implementation based on the expansions of [Karney 2011](https://arxiv.org/abs/1002.1417), [Kawase 2011](http://www.gsi.go.jp/common/000062452.pdf), and [Kawase 2013](http://www.gsi.go.jp/common/000065826.pdf). The original DMATM implementaion are also present for reference.
+__After 2025-12-21__ the UTM routines use an implementation based on the expansions of [Karney 2011](https://arxiv.org/abs/1002.1417), [Kawase 2011](http://www.gsi.go.jp/common/000062452.pdf), and [Kawase 2013](http://www.gsi.go.jp/common/000065826.pdf). The original DMATM implementation is also retained for reference.
 
 ## Bulding and testing
 
