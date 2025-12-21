@@ -868,7 +868,7 @@ int main()
   double E;
   double N;
 
-  std::cout << "Tests transformations to/from UTM grid (reproduces Table 2-11 of DMTAM 8358.2)\n\n";
+  std::cout << "Tests transformations to/from UTM grid (reproduces Table 2-11 of DMA TM 8358.2)\n\n";
 
   // ----------------------------------------------
   // TEST OF FORWARD GOING UTM ELLIPSOID CONVERSION
@@ -989,7 +989,7 @@ int main()
   // TEST OF FORWARD GOING UPS ELLIPSOID CONVERSION
   // ----------------------------------------------
 
-  std::cout << "Tests transformations to/from UPS grid (reproduces Table 3-7 of DMTAM 8358.2)\n\n";
+  std::cout << "Tests transformations to/from UPS grid (reproduces Table 3-7 of DMA TM 8358.2)\n\n";
 
   a = 6378137.0;
   e2 = 0.006694379990;
