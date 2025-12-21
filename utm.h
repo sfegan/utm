@@ -7,7 +7,7 @@
  * Stephen Fegan, July 2005, sfegan@gmail.com
  *
  * 2025-12-21: The primary conversion functions have been replaced with
- * versions based on Karney 2011 and Kawase 2011, 2021. The original
+ * versions based on Karney 2011 and Kawase 2011, 2013. The original
  * version based on the DMA  algorithms has been obsoleted but retained for
  * reference.
  *

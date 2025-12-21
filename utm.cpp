@@ -7,7 +7,7 @@
  * Stephen Fegan, July 2005, sfegan@gmail.com
  *
  * 2025-12-21: The primary conversion functions have been replaced with
- * versions based on Karney 2011 and Kawase 2011, 2021. The original
+ * versions based on Karney 2011 and Kawase 2011, 2013. The original
  * version based on the DMA algorithms has been obsoleted but retained for
  * reference.
  * 
@@ -68,7 +68,7 @@
    1.1 - 2015-08-30 - Fixed error in calculation of sin(8phi), add some comments
                       to test table output.
    2.0 - 2025-12-21 - Obsoleted the DMATM based functions in favor of those based
-                      on Karney 2011 and Kawase 2011, 2021.
+                      on Karney 2011 and Kawase 2011, 2013.
 */
 
 #if defined(__cplusplus)
@@ -187,7 +187,7 @@ void geographic_to_tm(double a, double e2, double k0,
 		      double lat_rad, double lon_rad,
 		      double* N, double* E)
 {
-	// See Karney 2011 and Kawase 2011, 2021
+	// See Karney 2011 and Kawase 2011, 2013
 	// https://arxiv.org/abs/1002.1417
 	// http://www.gsi.go.jp/common/000062452.pdf
 	// http://www.gsi.go.jp/common/000065826.pdf
@@ -221,7 +221,7 @@ void geographic_to_tm_with_convergence_and_scale(
 		      double lat_rad, double lon_rad,
 		      double* N, double* E, double* grid_convergence_rad, double* scale)
 {
-	// See Karney 2011 and Kawase 2011, 2021
+	// See Karney 2011 and Kawase 2011, 2013
 	// https://arxiv.org/abs/1002.1417
 	// http://www.gsi.go.jp/common/000062452.pdf
 	// http://www.gsi.go.jp/common/000065826.pdf
@@ -266,7 +266,7 @@ void tm_to_geographic(double a, double e2, double k0,
 		      double N, double E,
 		      double* lat_rad, double* lon_rad)
 {
-	// See Karney 2011 and Kawase 2011, 2021
+	// See Karney 2011 and Kawase 2011, 2013
 	// https://arxiv.org/abs/1002.1417
 	// http://www.gsi.go.jp/common/000062452.pdf
 	// http://www.gsi.go.jp/common/000065826.pdf
