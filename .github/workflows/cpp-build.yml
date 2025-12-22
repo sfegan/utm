@@ -21,11 +21,11 @@ jobs:
     - name: compile
       shell: bash
       run: |
-        ${CPP} -o utm_ellipse -DELLIPSE_TEST_MAIN datum.cpp utm.cpp
-        ${CPP} -o utm_sphere -DSPHERE_TEST_MAIN datum.cpp utm.cpp
+        ${CPP} -o test_ellipse test_ellipse.cpp datum.cpp utm.cpp
+        ${CPP} -o test_sphere test_sphere.cpp datum.cpp utm.cpp
       env:
         CPP: ${{ matrix.cpp }}
     - name: ellipse_test
-      run: ./utm_ellipse
+      run: ./test_ellipse
     - name: sphere_test
-      run: ./utm_sphere
+      run: ./test_sphere

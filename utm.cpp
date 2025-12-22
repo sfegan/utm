@@ -405,8 +405,6 @@ void dmatm_geographic_to_tm(double a, double e2, double k0,
   *E = FE + dl*(T6 + dl2*T7 + dl4*T8 + dl6*T9);
 }
 
-#include<iostream>
-#include<iomanip>
 void dmatm_tm_to_geographic(double a, double e2, double k0, 
 		      double lon_mer, double FN, double FE,
 		      double N, double E,
@@ -542,20 +540,20 @@ void geographic_to_ps(double a, double e2, double k0,
 
   double s_lat = sin(lat_rad);
 
-  if(hemi==HEMI_NORTH)
-    tanzhalf = 
-      pow((1+e*s_lat)/(1-e*s_lat),e/2)*tan(M_PI/4-lat_rad/2);
-  else
-    tanzhalf = 
-      pow((1-e*s_lat)/(1+e*s_lat),e/2)*tan(M_PI/4+lat_rad/2);
+  if(hemi==HEMI_NORTH) {
+    tanzhalf = pow((1+e*s_lat)/(1-e*s_lat),e/2)*tan(M_PI/4-lat_rad/2);
+  } else {
+    tanzhalf = pow((1-e*s_lat)/(1+e*s_lat),e/2)*tan(M_PI/4+lat_rad/2);
+  }
 
   R = k0*C0*tanzhalf;
 
   *E = FE + R*sin(lon_rad);
-  if(hemi==HEMI_NORTH)
+  if(hemi==HEMI_NORTH) {
     *N = FN - R*cos(lon_rad);
-  else if(hemi==HEMI_SOUTH)
+  } else if(hemi==HEMI_SOUTH) {
     *N = FN + R*cos(lon_rad);
+  }
 }
 
 void ps_to_geographic(double a, double e2, double k0, 
@@ -575,56 +573,51 @@ void ps_to_geographic(double a, double e2, double k0,
   double x = E-FE;
   double y = N-FN;
 
-  if((x==0)&&(y==0))
-    {
-      *lon_rad = 0; /* undefined */
-      if(hemi==HEMI_NORTH)
-	*lat_rad = M_PI/2;
-      else if(hemi==HEMI_SOUTH)
-	*lat_rad = -M_PI/2;
+  if((x==0)&&(y==0)) {
+    *lon_rad = 0; /* undefined */
+    if(hemi==HEMI_NORTH) {
+      *lat_rad = M_PI/2;
+    } else if(hemi==HEMI_SOUTH) {
+      *lat_rad = -M_PI/2;
     }
-  else
-    {
-      double R;
-      double tanzhalf;
-      double chi;
-      double phi;
+    return;
+  }
 
-      if(hemi==HEMI_NORTH)
-	*lon_rad = atan2(x,-y);
-      else if(hemi==HEMI_SOUTH)
-	*lon_rad = atan2(x,y);
+  double R;
+  double tanzhalf;
+  double chi;
+  double phi;
 
-      if(y==0)
-	R = fabs(x);
-      else if(x==0)
-	R = fabs(y);
-      else 
-	R = fabs(x/sin(*lon_rad));
-      
-      tanzhalf = R/(k0*C0);
-      chi = M_PI/2 - 2*atan(tanzhalf);
+  if(hemi==HEMI_NORTH) {
+    *lon_rad = atan2(x,-y);
+  } else if(hemi==HEMI_SOUTH) {
+    *lon_rad = atan2(x,y);
+  }
 
-#if 0
-      phi = chi + 
-	Abar*sin(2*chi) + Bbar*sin(4*chi) + Cbar*sin(6*chi) + Dbar*sin(8*chi);
-#else
-      double s2chi = sin(2.0*chi);
-      double c2chi = cos(2.0*chi);
-      double s4chi = 2.0*s2chi*c2chi;
-      double c4chi = c2chi*c2chi-s2chi*s2chi;
-      double s6chi = s4chi*c2chi+s2chi*c4chi;
-      double s8chi = 2.0*s4chi*c4chi;
-      phi = chi + Abar*s2chi + Bbar*s4chi + Cbar*s6chi + Dbar*s8chi;
-#endif
+  if(y==0) {
+    R = fabs(x);
+  } else if(x==0) {
+    R = fabs(y);
+  } else  {
+    R = fabs(x/sin(*lon_rad));
+  }
+    
+  tanzhalf = R/(k0*C0);
+  chi = M_PI/2 - 2*atan(tanzhalf);
 
-      if(hemi==HEMI_NORTH)
-	*lat_rad = phi;
-      else if(hemi==HEMI_SOUTH)
-	*lat_rad = -phi;
-    }
+  double s2chi = sin(2.0*chi);
+  double c2chi = cos(2.0*chi);
+  double s4chi = 2.0*s2chi*c2chi;
+  double c4chi = c2chi*c2chi-s2chi*s2chi;
+  double s6chi = s4chi*c2chi+s2chi*c4chi;
+  double s8chi = 2.0*s4chi*c4chi;
+  phi = chi + Abar*s2chi + Bbar*s4chi + Cbar*s6chi + Dbar*s8chi;
 
-  return;
+  if(hemi==HEMI_NORTH) {
+    *lat_rad = phi;
+  } else if(hemi==HEMI_SOUTH) {
+    *lat_rad = -phi;
+  }
 }
 
 #define RAD(x) ((x)/180.0*M_PI)
@@ -642,70 +635,74 @@ int geographic_to_grid(double a, double e2,
 		       double lat_rad, double lon_rad, 
 		       GridZone* zone, Hemisphere* hemi, double* N, double* E)
 {
-  if((lat_rad>RAD(90))||(lat_rad<RAD(-90)))return 0;
-  if((lon_rad>RAD(180))||(lon_rad<RAD(-180)))
-    {
-      lon_rad = fmod(fmod(lon_rad,RAD(360))+RAD(360),RAD(360));
-      if(lon_rad>RAD(180))lon_rad-=RAD(360);
+  if((lat_rad>RAD(90))||(lat_rad<RAD(-90))) {
+    return 0;
+  }
+
+  if((lon_rad>RAD(180))||(lon_rad<RAD(-180))) {
+    lon_rad = fmod(fmod(lon_rad,RAD(360))+RAD(360),RAD(360));
+    if(lon_rad>RAD(180))lon_rad-=RAD(360);
+  }
+
+  if(*zone == GRID_AUTO) {
+    if(lat_rad>=RAD(84))*zone=UPS_NORTH;
+    else if(lat_rad<RAD(-80))*zone=UPS_SOUTH;
+    else *zone=UTM_ZONE_AUTO;
+  }
+
+  if((*zone==UPS_NORTH)||(*zone==UPS_SOUTH)) {
+    if(*zone==UPS_NORTH)*hemi = HEMI_NORTH;
+    else *hemi = HEMI_SOUTH;
+
+    if(e2!=0) {
+	    geographic_to_ps(a, e2, UPS_K0, *hemi, UPS_FN, UPS_FE, lat_rad, lon_rad, N, E);
+    } else {
+      geographic_to_ps_sphere(a, UPS_K0, *hemi, UPS_FN, UPS_FE, lat_rad, lon_rad, N, E);
     }
-
-  if(*zone == GRID_AUTO)
-    {
-      if(lat_rad>=RAD(84))*zone=UPS_NORTH;
-      else if(lat_rad<RAD(-80))*zone=UPS_SOUTH;
-      else *zone=UTM_ZONE_AUTO;
-    }
-
-  if((*zone==UPS_NORTH)||(*zone==UPS_SOUTH))
-    {
-      if(*zone==UPS_NORTH)*hemi = HEMI_NORTH;
-      else *hemi = HEMI_SOUTH;
-
-      if(e2!=0)
-	geographic_to_ps(a, e2, UPS_K0, *hemi, UPS_FN, UPS_FE,
-			 lat_rad, lon_rad, N, E);
-      else
-	geographic_to_ps_sphere(a, UPS_K0, *hemi, UPS_FN, UPS_FE,
-				lat_rad, lon_rad, N, E);
-    }
-  else
-    {
-      unsigned izone = (unsigned)*zone;
-
-      double lon_mer;
-      double fn;
-
-      if((izone<1)||(izone>60))
-	{
-	  izone = (unsigned)((lon_rad+RAD(180))/RAD(6))+1;
-	  if((lat_rad>=RAD(56))&&(lat_rad<RAD(64))&&
-	     (lon_rad>=RAD(3))&&(lon_rad<RAD(12)))izone=32;
-	  else if((lat_rad>=RAD(72))&&(lat_rad<RAD(84))&&(lon_rad>=RAD(0)))
-	    {
-	      if(lon_rad<RAD(9))izone=31;
-	      else if(lon_rad<RAD(21))izone=33;
-	      else if(lon_rad<RAD(33))izone=35;
-	      else if(lon_rad<RAD(42))izone=37;
-	    }
-	}
+    return 1;
+  } 
   
-      *zone = (GridZone)izone;
+  unsigned izone = (unsigned)*zone;
 
-      if((*hemi!=HEMI_NORTH)&&(*hemi!=HEMI_SOUTH))
-	*hemi=lat_rad>=0?HEMI_NORTH:HEMI_SOUTH;
-      
-      lon_mer = (double)(izone-1) * RAD(6) - RAD(180) + RAD(3);
-  
-      if(*hemi==HEMI_NORTH)fn = UTM_FN_NH;
-      else fn = UTM_FN_SH;
+  double lon_mer;
+  double fn;
 
-      if(e2!=0)
-	geographic_to_tm(a, e2, UTM_K0, lon_mer, fn, UTM_FE,
-			 lat_rad, lon_rad, N, E);
-      else
-	geographic_to_tm_sphere(a, UTM_K0, lon_mer, fn, UTM_FE,
-				lat_rad, lon_rad, N, E);
+  if((izone<1)||(izone>60)) {
+    izone = (unsigned)((lon_rad+RAD(180))/RAD(6))+1;
+    if((lat_rad>=RAD(56))&&(lat_rad<RAD(64))&& (lon_rad>=RAD(3))&&(lon_rad<RAD(12))) {
+      izone=32;
     }
+  } else if((lat_rad>=RAD(72))&&(lat_rad<RAD(84))&&(lon_rad>=RAD(0))) {
+    if(lon_rad<RAD(9)) {
+      izone=31;
+    } else if(lon_rad<RAD(21)) {
+      izone=33;
+    } else if(lon_rad<RAD(33)) {
+      izone=35;
+    } else if(lon_rad<RAD(42)) {
+      izone=37;
+    }
+  }
+
+  *zone = (GridZone)izone;
+
+  if((*hemi!=HEMI_NORTH)&&(*hemi!=HEMI_SOUTH)) {
+    *hemi=lat_rad>=0?HEMI_NORTH:HEMI_SOUTH;
+  }
+    
+  lon_mer = (double)(izone-1) * RAD(6) - RAD(180) + RAD(3);
+
+  if(*hemi==HEMI_NORTH) {
+    fn = UTM_FN_NH;
+  } else {
+    fn = UTM_FN_SH;
+  }
+
+  if(e2!=0) {
+    geographic_to_tm(a, e2, UTM_K0, lon_mer, fn, UTM_FE, lat_rad, lon_rad, N, E);
+  } else {
+    geographic_to_tm_sphere(a, UTM_K0, lon_mer, fn, UTM_FE, lat_rad, lon_rad, N, E);
+  }
   
   return 1;
 }
@@ -714,462 +711,46 @@ int grid_to_geographic(double a, double e2,
 		       GridZone zone, Hemisphere hemi, double N, double E, 
 		       double* lat_rad, double* lon_rad)
 {
-  if((zone==UPS_NORTH)||(zone==UPS_SOUTH))
-    {
-      if(zone==UPS_NORTH)hemi = HEMI_NORTH;
-      else hemi = HEMI_SOUTH;
-
-      if(e2!=0)
-	ps_to_geographic(a, e2, UPS_K0, hemi, UPS_FN, UPS_FE,
-			 N, E, lat_rad, lon_rad);
-      else
-	ps_to_geographic_sphere(a, UPS_K0, hemi, UPS_FN, UPS_FE,
-				N, E, lat_rad, lon_rad);
+  if((zone==UPS_NORTH)||(zone==UPS_SOUTH)) {
+    if(zone==UPS_NORTH) {
+      hemi = HEMI_NORTH;
+    } else {
+      hemi = HEMI_SOUTH;
     }
-  else
-    {
-      unsigned izone = (unsigned)zone;
-      double lon_mer;
-      double fn;
+
+    if(e2!=0) {
+      ps_to_geographic(a, e2, UPS_K0, hemi, UPS_FN, UPS_FE, N, E, lat_rad, lon_rad);
+    } else {
+      ps_to_geographic_sphere(a, UPS_K0, hemi, UPS_FN, UPS_FE, N, E, lat_rad, lon_rad);
+    }
+    return 1;
+  }
+
+  unsigned izone = (unsigned)zone;
+  double lon_mer;
+  double fn;
+
+  if((izone<1)||(izone>60)) {
+    return 0;
+  }
   
-      if((izone<1)||(izone>60))return 0;
-      if((hemi!=HEMI_NORTH)&&(hemi!=HEMI_SOUTH))return 0;
+  if((hemi!=HEMI_NORTH)&&(hemi!=HEMI_SOUTH)) {
+    return 0;
+  }
 
-      lon_mer = (double)(izone-1) * RAD(6) - RAD(180) + RAD(3);
-      
-      if(hemi==HEMI_NORTH)fn = UTM_FN_NH;
-      else fn = UTM_FN_SH;
+  lon_mer = (double)(izone-1) * RAD(6) - RAD(180) + RAD(3);
+  
+  if(hemi==HEMI_NORTH) {
+    fn = UTM_FN_NH;
+  } else {
+    fn = UTM_FN_SH;
+  }
 
-      if(e2!=0)
-	tm_to_geographic(a, e2, UTM_K0, lon_mer, fn, UTM_FE,
-			 N, E, lat_rad, lon_rad);
-      else
-	tm_to_geographic_sphere(a, UTM_K0, lon_mer, fn, UTM_FE,
-				N, E, lat_rad, lon_rad);
-    }
+  if(e2!=0) {
+    tm_to_geographic(a, e2, UTM_K0, lon_mer, fn, UTM_FE, N, E, lat_rad, lon_rad);
+  } else {
+    tm_to_geographic_sphere(a, UTM_K0, lon_mer, fn, UTM_FE, N, E, lat_rad, lon_rad);
+  }
 
   return 1;
 }
-
-#ifdef ELLIPSE_TEST_MAIN
-
-#include<iostream>
-#include<sstream>
-#include<iomanip>
-
-bool dmsStringToRad(const std::string& str, double& rad)
-{
-  unsigned degs=0;
-  unsigned mins=0;
-  unsigned secs=0;
-  unsigned fracs=0;
-  unsigned frac10s=1;
-  unsigned i=0;
-
-  bool negative=false;
-  if(str[i]=='-') { negative = true; i++; }
-  else if(str[i]=='+') { negative = false; i++; }
-
-  while(i<str.length())
-    {
-      if((str[i]>='0')&&(str[i]<='9'))degs=degs*10+(str[i++]-'0');
-      else if((str[i]==':')||(str[i]=='d')) { i++; break; }
-      else return false;
-    }
-
-  while(i<str.length())
-    {
-      if((str[i]>='0')&&(str[i]<='9'))mins=mins*10+(str[i++]-'0');
-      else if((str[i]==':')||(str[i]=='m')) { i++; break; }
-      else return false;
-    }
-
-  while(i<str.length())
-    {
-      if((str[i]>='0')&&(str[i]<='9'))secs=secs*10+(str[i++]-'0');
-      else if(str[i]=='.') { i++; break; }
-      else if(str[i]=='s') { break; }
-      else return false;
-    }
-
-  while(i<str.length())
-    {
-      if((str[i]>='0')&&(str[i]<='9'))
-        { fracs=fracs*10+(str[i++]-'0'); frac10s=frac10s*10; }
-      else if(str[i]=='s') { i++; break; }
-      else return false;
-    }
-
-  if(i<str.length())return false;
-
-  rad = ((negative?-1:1)*
-	 (double(degs)+double(mins)/60+double(secs)/(60*60)+
-	  double(fracs)/double(frac10s)/(60*60))/180.0*M_PI);
-  
-  return true;
-}
-
-std::string radToDMSString(double rad, 
-			   unsigned sec_digits=3, bool dmsSep=false)
-{
-  const unsigned divisor10[] = { 1, 10, 100, 1000, 10000, 100000, 1000000,
-				 10000000, 100000000, 1000000000 };
-
-  double deg = fmod(fmod(rad/M_PI*180,360)+360,360);
-  if(deg>=180)deg-=360;
-
-  unsigned multiplier = divisor10[sec_digits];
-
-  unsigned iangle = unsigned(floor(fabs(deg)*60*60*multiplier+0.5));
-
-  bool negative =(deg<0);
-  unsigned degs = iangle/(60*60*multiplier);
-  unsigned mins = (iangle/(60*multiplier))%60;
-  unsigned secs =(iangle/multiplier)%60;
-  unsigned fsec = iangle%multiplier;
-
-  std::ostringstream stream;
-  stream << (negative?'-':'+')
-         << std::setfill('0')
-         << std::setw(3) << std::setprecision(3) << degs << (dmsSep?'d':':')
-         << std::setw(2) << std::setprecision(2) << mins << (dmsSep?'m':':')
-         << std::setw(2) << std::setprecision(2) << secs;
-  if(sec_digits)stream << '.' << std::setw(sec_digits)
-                       << std::setprecision(sec_digits) << fsec;
-  if(dmsSep)stream << 's';
-
-  return stream.str();
-}
-
-void write_entry(std::ostream& stream,
-		 double lat, double lon, double N, double E)
-{
-  stream << "LAT: " << radToDMSString(lat) << "   LONG: "
-	 << radToDMSString(lon) << "   " << std::fixed
-	 << "N: " << std::setw(10) << std::setprecision(2) << N << "   " 
-	 << "E: " << std::setw(9) << std::setprecision(2) << E 
-	 << std::endl;
-}
-
-// Test of the series approximate ellipsoidal TM conversion. Reproduce
-// Section 2-11 from "The Universal Grids", Defense Mapping Agency
-// Technical Manual (DMATM) 8358.2
-
-int main()
-{
-  double a = 6378388.0;
-  double e2 = 0.006722670022;
-
-  double lon_rad;
-  double lat_rad;
-  GridZone zone;
-  Hemisphere hemi;
-
-  double E;
-  double N;
-
-  std::cout << "Tests transformations to/from UTM grid (reproduces Table 2-11 of DMA TM 8358.2)\n\n";
-
-  // ----------------------------------------------
-  // TEST OF FORWARD GOING UTM ELLIPSOID CONVERSION
-  // ----------------------------------------------
-
-  // ------
-  // ID = 1
-  // ------
-
-  dmsStringToRad("+045d00m00.000s",lon_rad);
-  dmsStringToRad("+73d00m00.000s",lat_rad);
-  zone = UTM_ZONE_38;
-  hemi = HEMI_NORTH;
-
-  geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
-
-  // ------
-  // ID = 2
-  // ------
-
-  dmsStringToRad("+102d00m00.000s",lon_rad);
-  dmsStringToRad("+30d00m00.000s",lat_rad);
-  zone = UTM_ZONE_47;
-
-  geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
-
-  zone = UTM_ZONE_48;
-
-  geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
-
-  // ------
-  // ID = 3
-  // ------
-
-  dmsStringToRad("-113d54m43.321s",lon_rad);
-  dmsStringToRad("+72d04m32.110",lat_rad);
-  zone = UTM_ZONE_12;
-
-  geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
-
-  zone = UTM_ZONE_11;
-
-  geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
-
-  std::cout << std::endl;
-
-  // -----------------------------------------------
-  // TEST OF BACKWARD GOING UTM ELLIPSOID CONVERSION
-  // -----------------------------------------------
-
-  // ------
-  // ID = 4
-  // ------
-
-  N = 3322824.35;
-  E = 210577.93;
-
-  grid_to_geographic(a, e2, UTM_ZONE_48, HEMI_NORTH, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
-
-
-  N = 3322824.08;
-  E = 789411.59;
-
-  grid_to_geographic(a, e2, UTM_ZONE_47, HEMI_NORTH, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
-
-  // ------
-  // ID = 5
-  // ------
-
-  N = 1000000.00;
-  E = 200000.00;
-
-  grid_to_geographic(a, e2, UTM_ZONE_31, HEMI_NORTH, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
-
-  N = 1000491.75;
-  E = 859739.88;
-
-  grid_to_geographic(a, e2, UTM_ZONE_30, HEMI_NORTH, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
-  
-  // ------
-  // ID = 6
-  // ------
-
-  N = 9000000.00;
-  E = 500000.00;
-
-  grid_to_geographic(a, e2, UTM_ZONE_43, HEMI_NORTH, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
-
-  // ------
-  // ID = 7
-  // ------
-
-  N = 4000000.00;
-  E = 700000.00;
-
-  grid_to_geographic(a, e2, UTM_ZONE_30, HEMI_SOUTH, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
-
-  N = 4000329.42;
-  E = 307758.89;
-
-  grid_to_geographic(a, e2, UTM_ZONE_31, HEMI_SOUTH, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
-
-  std::cout << std::endl;
-  
-  // ----------------------------------------------
-  // TEST OF FORWARD GOING UPS ELLIPSOID CONVERSION
-  // ----------------------------------------------
-
-  std::cout << "Tests transformations to/from UPS grid (reproduces Table 3-7 of DMA TM 8358.2)\n\n";
-
-  a = 6378137.0;
-  e2 = 0.006694379990;
-
-  // ------
-  // ID = 1
-  // ------
-
-  dmsStringToRad("-132d14m52.761s",lon_rad);
-  dmsStringToRad("+84d17m14.042s",lat_rad);
-  zone = UPS_NORTH;
-
-  geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
-
-  // ------
-  // ID = 2
-  // ------
-
-  dmsStringToRad("+044d00m00.000s",lon_rad);
-  dmsStringToRad("+73d00m00.000s",lat_rad);
-  zone = UPS_NORTH;
-
-  geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
-  
-  // ------
-  // ID = 3
-  // ------
-
-  dmsStringToRad("+132d14m52.303s",lon_rad);
-  dmsStringToRad("-87d17m14.400s",lat_rad);
-  zone = UPS_SOUTH;
-
-  geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
-  
-  std::cout << std::endl;
-
-  // -----------------------------------------------
-  // TEST OF BACKWARD GOING UPS ELLIPSOID CONVERSION
-  // -----------------------------------------------
-
-  // ------
-  // ID = 4
-  // ------
-
-  N = 2426773.60;
-  E = 1530125.78;
-
-  grid_to_geographic(a, e2, UPS_NORTH, HEMI_AUTO, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
-
-  // ------
-  // ID = 5
-  // ------
-
-  N = 632668.43;
-  E = 3320416.75;
-
-  grid_to_geographic(a, e2, UPS_NORTH, HEMI_AUTO, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
-
-  // ------
-  // ID = 6
-  // ------
-
-  N = 1500000.00;
-  E = 2500000.00;
-
-  grid_to_geographic(a, e2, UPS_SOUTH, HEMI_AUTO, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
-}
-
-#endif /* ELLIPSE_TEST_MAIN */
-
-
-#ifdef SPHERE_TEST_MAIN
-
-// Test of the exact spherical TM conversion. Reproduce Table 10 from
-// "MAP PROJECTIONS; A WORKING MANUAL", John Snyder, USGS Professional
-// Paper 1395, 1987. Page 59-60.
-
-#include<iostream>
-#include<sstream>
-#include<iomanip>
-
-int main()
-{
-  for(unsigned ilat=0;ilat<10;ilat++)
-    {
-      if(ilat!=0)std::cout << std::endl;
-
-      double lat_rad=double(9-ilat)*RAD(10);
-      double x[10];
-      double y[10];
-      for(unsigned ilon=0;ilon<10;ilon++)
-	{
-	  double lon_rad=double(ilon)*RAD(10);
-	  geographic_to_tm_sphere(1.0, 1.0, 0.0, 0.0, 0.0, 
-				  lat_rad, lon_rad, &y[ilon], &x[ilon]);
-
-#if 0
-	  // Test FORWARD followed by BACKWARD conversion
-	  tm_to_geographic_sphere(1.0, 1.0, 0.0, 0.0, 0.0, 
-				  y[ilon], x[ilon], &y[ilon], &x[ilon]);
-	  y[ilon] *= 180/M_PI;
-	  x[ilon] *= 180/M_PI;
-#endif
-	}
-
-      for(unsigned ilon=0;ilon<10;ilon++)
-	{
-	  if(ilon)std::cout << ' ';
-	  std::cout << std::fixed << std::setw(7) << std::setprecision(5)
-		    << x[ilon];
-	}
-      std::cout << std::endl;
-      for(unsigned ilon=0;ilon<10;ilon++)
-	{
-	  if(ilon)std::cout << ' ';
-	  std::cout << std::fixed << std::setw(7) << std::setprecision(5)
-		    << y[ilon];
-	}
-      std::cout << std::endl;
-    }
-}
-
-#endif /* SPHERE_TEST_MAIN */
-
-
-#ifdef SIMPLE_CONVERT_MAIN
-
-#include<iostream>
-#include<fstream>
-#include<iomanip>
-
-int main(int argc, char** argv)
-{
-  const char* program = *argv;
-  argv++,argc--;
-
-  std::istream* stream = &std::cin;
-  if(argc)
-    {
-      stream = new std::ifstream(*argv);
-      argv++,argc--;
-    }
-
-  const double a = 6378137.0;
-  const double e2 = 0.006694379990;
-      
-  double lon;
-  double lat;
-  
-  *stream >> lon >> lat;
-  while(*stream)
-    {
-      lat = RAD(lat);
-      lon = RAD(lon);
-
-      double N;
-      double E;
-      
-      GridZone zone = GRID_AUTO;
-      Hemisphere hemi = HEMI_AUTO;
-
-      geographic_to_grid(a, e2, lat, lon, &zone, &hemi, &N, &E);
-      
-      std::cout << std::fixed 
-		    << std::setw(10) << std::setprecision(2) << N << "   "
-		    << std::setw(10) << std::setprecision(2) << E << "   "
-    		<< std::setw(2) << (unsigned)zone << "   "
-    		<< std::setw(2) << (unsigned)hemi 
-    		<< std::endl;
-
-      *stream >> lon >> lat;
-    }
-
-  if(stream != &std::cin)delete stream;
-}
-
-#endif /* SIMPLE_CONVERT_MAIN */
