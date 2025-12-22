@@ -104,6 +104,19 @@ void write_entry(std::ostream& stream,
 	 << std::endl;
 }
 
+void write_entry(std::ostream& stream,
+		 double lat, double lon, double N, double E, double gc_rad, double scale)
+{
+  stream << "LAT: " << radToDMSString(lat) << "   LONG: "
+	 << radToDMSString(lon) << "   " << std::fixed
+	 << "N: " << std::setw(10) << std::setprecision(2) << N << "   " 
+	 << "E: " << std::setw(9) << std::setprecision(2) << E << "   "
+   << "C: " << radToDMSString(gc_rad) << "   "
+   << "S: " << std::setw(10) << std::setprecision(8) << scale
+	 << std::endl;
+}
+
+
 // Test of the series approximate ellipsoidal TM conversion. Reproduce
 // Section 2-11 from "The Universal Grids", Defense Mapping Agency
 // Technical Manual (DMATM) 8358.2
@@ -120,6 +133,8 @@ int main()
 
   double E;
   double N;
+  double gc_rad;
+  double scale;
 
   std::cout << "Tests transformations to/from UTM grid (reproduces Table 2-11 of DMA TM 8358.2)\n\n";
 
@@ -136,8 +151,8 @@ int main()
   zone = UTM_ZONE_38;
   hemi = HEMI_NORTH;
 
-  geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
+  geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E, &gc_rad, &scale);
+  write_entry(std::cout, lat_rad, lon_rad, N, E, gc_rad, scale);
 
   // ------
   // ID = 2
@@ -147,13 +162,13 @@ int main()
   dmsStringToRad("+30d00m00.000s",lat_rad);
   zone = UTM_ZONE_47;
 
-  geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
+  geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E, &gc_rad, &scale);
+  write_entry(std::cout, lat_rad, lon_rad, N, E, gc_rad, scale);
 
   zone = UTM_ZONE_48;
 
-  geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
+  geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E, &gc_rad, &scale);
+  write_entry(std::cout, lat_rad, lon_rad, N, E, gc_rad, scale);
 
   // ------
   // ID = 3
@@ -163,13 +178,13 @@ int main()
   dmsStringToRad("+72d04m32.110",lat_rad);
   zone = UTM_ZONE_12;
 
-  geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
+  geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E, &gc_rad, &scale);
+  write_entry(std::cout, lat_rad, lon_rad, N, E, gc_rad, scale);
 
   zone = UTM_ZONE_11;
 
-  geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
+  geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E, &gc_rad, &scale);
+  write_entry(std::cout, lat_rad, lon_rad, N, E, gc_rad, scale);
 
   std::cout << std::endl;
 

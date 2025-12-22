@@ -71,15 +71,8 @@
                       on Karney 2011 and Kawase 2011, 2013.
 */
 
-#if defined(__cplusplus)
 #include<cmath>
-#else
-#include<math.h>
-#endif
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
+#include<stdexcept>
 
 #include "utm.h"
 
@@ -96,9 +89,9 @@
 */    
 
 void geographic_to_tm_sphere(double R, double k0, 
-			     double lon_mer, double FN, double FE,
-			     double lat_rad, double lon_rad,
-			     double* N, double* E)
+          double lon_mer, double FN, double FE,
+          double lat_rad, double lon_rad,
+          double* N, double* E)
 {
   double Rk0 = R*k0;
   double B = cos(lat_rad) * sin(lon_rad - lon_mer);
@@ -106,10 +99,24 @@ void geographic_to_tm_sphere(double R, double k0,
   *N = FN + Rk0*atan(tan(lat_rad)/cos(lon_rad - lon_mer));
 }
 
+void geographic_to_tm_sphere_with_convergence_and_scale(
+          double R, double k0, 
+          double lon_mer, double FN, double FE,
+          double lat_rad, double lon_rad,
+          double* N, double* E, double* grid_convergence_rad, double* scale)
+{
+  double Rk0 = R*k0;
+  double B = cos(lat_rad) * sin(lon_rad - lon_mer);
+  *E = FE + Rk0*atanh(B);
+  *N = FN + Rk0*atan(tan(lat_rad)/cos(lon_rad - lon_mer));
+  *grid_convergence_rad = atan(tan(lon_rad - lon_mer)*sin(lat_rad));
+  *scale = k0/sqrt(1 - B*B);
+}
+
 void tm_to_geographic_sphere(double R, double k0, 
-			     double lon_mer, double FN, double FE,
-			     double N, double E,
-			     double* lat_rad, double* lon_rad)
+          double lon_mer, double FN, double FE,
+          double N, double E,
+          double* lat_rad, double* lon_rad)
 {
   double Rk0 = R*k0;
   double D = (N-FN)/Rk0;
@@ -471,10 +478,6 @@ void dmatm_tm_to_geographic(double a, double e2, double k0,
       phi *= y/T1;
     }
 
-#if !defined(__cplusplus)
-  if(1) { /* Open up new scope to declare new variables in C */
-#endif
-
   double s2 = s*s;
   
   double nu = a/sqrt(1-e2*s2);
@@ -522,10 +525,6 @@ void dmatm_tm_to_geographic(double a, double e2, double k0,
   
   *lat_rad = phi - x2*T10 + x4*T11 - x6*T12 + x8*T13;
   *lon_rad = lon_mer + x*(T14 - x2*T15 + x4*T16 - x6*T17);
-
-#if !defined(__cplusplus)
-  }
-#endif
 }
 
 //    d8888b.  .d88b.  db       .d8b.  d8888b. 
@@ -648,7 +647,8 @@ void ps_to_geographic(double a, double e2, double k0,
 
 int geographic_to_grid(double a, double e2,
 		       double lat_rad, double lon_rad, 
-		       GridZone* zone, Hemisphere* hemi, double* N, double* E)
+		       GridZone* zone, Hemisphere* hemi, 
+           double* N, double* E, double* grid_convergence_rad, double* scale)
 {
   if((lat_rad>RAD(90))||(lat_rad<RAD(-90))) {
     return 0;
@@ -668,6 +668,10 @@ int geographic_to_grid(double a, double e2,
   if((*zone==UPS_NORTH)||(*zone==UPS_SOUTH)) {
     if(*zone==UPS_NORTH)*hemi = HEMI_NORTH;
     else *hemi = HEMI_SOUTH;
+
+    if(grid_convergence_rad != nullptr and scale != nullptr) {
+      throw std::runtime_error("grid convergence and scale not implemented for UPS");
+    }
 
     if(e2!=0) {
 	    geographic_to_ps(a, e2, UPS_K0, *hemi, UPS_FN, UPS_FE, lat_rad, lon_rad, N, E);
@@ -716,9 +720,21 @@ int geographic_to_grid(double a, double e2,
   }
 
   if(e2!=0) {
-    geographic_to_tm(a, e2, UTM_K0, lon_mer, fn, UTM_FE, lat_rad, lon_rad, N, E);
+    if(grid_convergence_rad != nullptr and scale != nullptr) {
+      geographic_to_tm_with_convergence_and_scale(
+        a, e2, UTM_K0, lon_mer, fn, UTM_FE, lat_rad, lon_rad, N, E, grid_convergence_rad, scale);
+    } else {
+      geographic_to_tm(
+        a, e2, UTM_K0, lon_mer, fn, UTM_FE, lat_rad, lon_rad, N, E);
+    }
   } else {
-    geographic_to_tm_sphere(a, UTM_K0, lon_mer, fn, UTM_FE, lat_rad, lon_rad, N, E);
+    if(grid_convergence_rad != nullptr and scale != nullptr) {
+      geographic_to_tm_sphere_with_convergence_and_scale(
+        a, UTM_K0, lon_mer, fn, UTM_FE, lat_rad, lon_rad, N, E, grid_convergence_rad, scale);
+    } else {
+      geographic_to_tm_sphere(
+        a, UTM_K0, lon_mer, fn, UTM_FE, lat_rad, lon_rad, N, E);
+    }
   }
   
   return 1;

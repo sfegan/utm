@@ -161,7 +161,9 @@ void ps_to_geographic(double a, double e2, double k0,
 
 int geographic_to_grid(double a, double e2,
 		       double lat_rad, double lon_rad, 
-		       GridZone* zone, Hemisphere* hemi, double* N, double* E);
+		       GridZone* zone, Hemisphere* hemi, 
+			   double* N, double* E, 
+			   double* grid_convergence_rad=nullptr, double* scale = nullptr);
 
 int grid_to_geographic(double a, double e2,		       
 		       GridZone zone, Hemisphere hemi, double N, double E,
