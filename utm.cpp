@@ -528,6 +528,13 @@ void dmatm_tm_to_geographic(double a, double e2, double k0,
 #endif
 }
 
+//    d8888b.  .d88b.  db       .d8b.  d8888b. 
+//    88  `8D .8P  Y8. 88      d8' `8b 88  `8D 
+//    88oodD' 88    88 88      88ooo88 88oobY' 
+//    88~~~   88    88 88      88~~~88 88`8b   
+//    88      `8b  d8' 88booo. 88   88 88 `88. 
+//    88       `Y88P'  Y88888P YP   YP 88   YD 
+
 void geographic_to_ps(double a, double e2, double k0, 
 		      Hemisphere hemi, double FN, double FE,
 		      double lat_rad, double lon_rad,
@@ -620,6 +627,14 @@ void ps_to_geographic(double a, double e2, double k0,
   }
 }
 
+//    db    db d888888b .88b  d88.      dD db    db d8888b. .d8888. 
+//    88    88 `~~88~~' 88'YbdP`88     d8' 88    88 88  `8D 88'  YP 
+//    88    88    88    88  88  88    d8'  88    88 88oodD' `8bo.   
+//    88    88    88    88  88  88   d8'   88    88 88~~~     `Y8b. 
+//    88b  d88    88    88  88  88  d8'    88b  d88 88      db   8D 
+//    ~Y8888P'    YP    YP  YP  YP C8'     ~Y8888P' 88      `8888Y' 
+
+
 #define RAD(x) ((x)/180.0*M_PI)
 
 #define UTM_K0       0.9996
@@ -670,8 +685,10 @@ int geographic_to_grid(double a, double e2,
   if((izone<1)||(izone>60)) {
     izone = (unsigned)((lon_rad+RAD(180))/RAD(6))+1;
     if((lat_rad>=RAD(56))&&(lat_rad<RAD(64))&& (lon_rad>=RAD(3))&&(lon_rad<RAD(12))) {
+      // Special case for Norway
       izone=32;
     } else if((lat_rad>=RAD(72))&&(lat_rad<RAD(84))&&(lon_rad>=RAD(0))) {
+      // Special cases for Svalbard
       if(lon_rad<RAD(9)) {
         izone=31;
       } else if(lon_rad<RAD(21)) {
