@@ -96,24 +96,36 @@ typedef enum Hemisphere Hemisphere;
 /* FORWARD AND BACK TM/PS PROJECTIONS FOR A SPHERE */
 
 void geographic_to_tm_sphere(double R, double k0, 
-			     double lon_mer, double FN, double FE,
-			     double lat_rad, double lon_rad,
-			     double* N, double* E);
+			double lon_mer, double FN, double FE,
+			double lat_rad, double lon_rad,
+			double* N, double* E);
+
+void geographic_to_tm_sphere_with_convergence_and_scale(
+			double R, double k0, 
+			double lon_mer, double FN, double FE,
+			double lat_rad, double lon_rad,
+			double* N, double* E, double* grid_convergence_rad, double* scale);
 
 void tm_to_geographic_sphere(double R, double k0, 
-			     double lon_mer, double FN, double FE,
-			     double N, double E,
-			     double* lat_rad, double* lon_rad);
+			double lon_mer, double FN, double FE,
+			double N, double E,
+			double* lat_rad, double* lon_rad);
 
 void geographic_to_ps_sphere(double R, double k0, 
-			     Hemisphere hemi, double FN, double FE,
-			     double lat_rad, double lon_rad,
-			     double* N, double* E);
+			Hemisphere hemi, double FN, double FE,
+			double lat_rad, double lon_rad,
+			double* N, double* E);
+
+void geographic_to_ps_sphere_with_convergence_and_scale(
+			double R, double k0, 
+			Hemisphere hemi, double FN, double FE,
+			double lat_rad, double lon_rad,
+			double* N, double* E, double* grid_convergence_rad, double* scale);
 
 void ps_to_geographic_sphere(double R, double k0, 
-			     Hemisphere hemi, double FN, double FE,
-			     double N, double E,
-			     double* lat_rad, double* lon_rad);
+			Hemisphere hemi, double FN, double FE,
+			double N, double E,
+			double* lat_rad, double* lon_rad);
 
 /* FORWARD AND BACK TM/PS PROJECTIONS FOR AN ELLIPSOID */
 
@@ -122,51 +134,57 @@ void ps_to_geographic_sphere(double R, double k0,
 #endif
 
 void dmatm_geographic_to_tm(double a, double e2, double k0, 
-		      double lon_mer, double FN, double FE,
-		      double lat_rad, double lon_rad,
-		      double* N, double* E);
+			double lon_mer, double FN, double FE,
+			double lat_rad, double lon_rad,
+			double* N, double* E);
 
 void dmatm_tm_to_geographic(double a, double e2, double k0, 
-		      double lon_mer, double FN, double FE,
-		      double N, double E,
-		      double* lat_rad, double* lon_rad);
+			double lon_mer, double FN, double FE,
+			double N, double E,
+			double* lat_rad, double* lon_rad);
 
 void geographic_to_tm(double a, double e2, double k0, 
-		      double lon_mer, double FN, double FE,
-		      double lat_rad, double lon_rad,
-		      double* N, double* E);
+			double lon_mer, double FN, double FE,
+			double lat_rad, double lon_rad,
+			double* N, double* E);
 
 void geographic_to_tm_with_convergence_and_scale(
-					double a, double e2, double k0,
-		      double lon_mer, double FN, double FE,
-		      double lat_rad, double lon_rad,
-		      double* N, double* E, double* grid_convergence_rad, double* scale);
+			double a, double e2, double k0,
+			double lon_mer, double FN, double FE,
+			double lat_rad, double lon_rad,
+			double* N, double* E, double* grid_convergence_rad, double* scale);
 
 void tm_to_geographic(double a, double e2, double k0, 
-		      double lon_mer, double FN, double FE,
-		      double N, double E,
-		      double* lat_rad, double* lon_rad);
+			double lon_mer, double FN, double FE,
+			double N, double E,
+			double* lat_rad, double* lon_rad);
 
 void geographic_to_ps(double a, double e2, double k0, 
-		      Hemisphere hemi, double FN, double FE,
-		      double lat_rad, double lon_rad,
-		      double* N, double* E);
+			Hemisphere hemi, double FN, double FE,
+			double lat_rad, double lon_rad,
+			double* N, double* E);
+
+// void geographic_to_ps_with_convergence_and_scale(
+// 			double a, double e2, double k0, 
+// 			Hemisphere hemi, double FN, double FE,
+// 			double lat_rad, double lon_rad,
+// 			double* N, double* E, double* grid_convergence_rad, double* scale);
 
 void ps_to_geographic(double a, double e2, double k0, 
-		      Hemisphere hemi, double FN, double FE,
-		      double N, double E,
-		      double* lat_rad, double* lon_rad);
+			Hemisphere hemi, double FN, double FE,
+			double N, double E,
+			double* lat_rad, double* lon_rad);
 
 /* FORWARD AND BACK PROJECTIONS FOR AN ELLIPSOID ONTO THE UTM/UPS GRID */
 
 int geographic_to_grid(double a, double e2,
-		       double lat_rad, double lon_rad, 
-		       GridZone* zone, Hemisphere* hemi, 
-			   double* N, double* E, 
-			   double* grid_convergence_rad=nullptr, double* scale = nullptr);
+			double lat_rad, double lon_rad, 
+			GridZone* zone, Hemisphere* hemi, 
+			double* N, double* E, 
+			double* grid_convergence_rad=nullptr, double* scale = nullptr);
 
 int grid_to_geographic(double a, double e2,		       
-		       GridZone zone, Hemisphere hemi, double N, double E,
-		       double* lat_rad, double* lon_rad);
+			GridZone zone, Hemisphere hemi, double N, double E,
+			double* lat_rad, double* lon_rad);
 
 #endif /* UTM_H */

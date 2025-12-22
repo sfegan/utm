@@ -142,6 +142,29 @@ void geographic_to_ps_sphere(double R, double k0,
     }
 }
 
+void geographic_to_ps_sphere_with_convergence_and_scale(
+			double R, double k0, 
+			Hemisphere hemi, double FN, double FE,
+			double lat_rad, double lon_rad,
+			double* N, double* E, double* grid_convergence_rad, double* scale)
+{
+  double Rk0 = R*k0;
+  if(hemi==HEMI_NORTH)
+    {
+      *E = FE + 2*Rk0*tan(M_PI/4 - lat_rad/2)*sin(lon_rad); // 21-5 Snyder
+      *N = FN - 2*Rk0*tan(M_PI/4 - lat_rad/2)*cos(lon_rad); // 21-6 Snyder
+      *scale = 2.0*k0/(1 + sin(lat_rad));  // 21-7 Snyder
+      *grid_convergence_rad = lon_rad;
+    }
+  else if(hemi==HEMI_SOUTH)
+    {
+      *E = FE + 2*Rk0*tan(M_PI/4 + lat_rad/2)*sin(lon_rad); // 21-9 Snyder
+      *N = FN + 2*Rk0*tan(M_PI/4 + lat_rad/2)*cos(lon_rad); // 21-10 Snyder
+      *scale = 2.0*k0/(1 - sin(lat_rad));  // 21-11 Snyder
+      *grid_convergence_rad = -lon_rad;
+    }
+}
+
 void ps_to_geographic_sphere(double R, double k0, 
 			     Hemisphere hemi, double FN, double FE,
 			     double N, double E,
@@ -562,6 +585,40 @@ void geographic_to_ps(double a, double e2, double k0,
   }
 }
 
+void geographic_to_ps_with_convergence_and_scale(
+			double a, double e2, double k0, 
+			Hemisphere hemi, double FN, double FE,
+			double lat_rad, double lon_rad,
+			double* N, double* E, double* grid_convergence_rad, double* scale)
+{
+  double e = sqrt(e2);
+  double C0 = 2*a/sqrt(1-e2)*pow((1-e)/(1+e),e/2);
+  double tanzhalf;
+  double R;
+
+  double s_lat = sin(lat_rad);
+
+  if(hemi==HEMI_NORTH) {
+    tanzhalf = pow((1+e*s_lat)/(1-e*s_lat),e/2)*tan(M_PI/4-lat_rad/2);
+  } else {
+    tanzhalf = pow((1-e*s_lat)/(1+e*s_lat),e/2)*tan(M_PI/4+lat_rad/2);
+  }
+
+  R = k0*C0*tanzhalf;
+
+  double nu = a/sqrt(1-e2*s_lat*s_lat);
+
+  *E = FE + R*sin(lon_rad);
+  if(hemi==HEMI_NORTH) {
+    *N = FN - R*cos(lon_rad);
+    *grid_convergence_rad = lon_rad;
+  } else if(hemi==HEMI_SOUTH) {
+    *N = FN + R*cos(lon_rad);
+    *grid_convergence_rad = -lon_rad;
+  }
+  *scale = R/(nu*cos(lat_rad));
+}
+
 void ps_to_geographic(double a, double e2, double k0, 
 		      Hemisphere hemi, double FN, double FE,
 		      double N, double E,
@@ -669,14 +726,22 @@ int geographic_to_grid(double a, double e2,
     if(*zone==UPS_NORTH)*hemi = HEMI_NORTH;
     else *hemi = HEMI_SOUTH;
 
-    if(grid_convergence_rad != nullptr and scale != nullptr) {
-      throw std::runtime_error("grid convergence and scale not implemented for UPS");
-    }
-
     if(e2!=0) {
-	    geographic_to_ps(a, e2, UPS_K0, *hemi, UPS_FN, UPS_FE, lat_rad, lon_rad, N, E);
+      if(grid_convergence_rad != nullptr and scale != nullptr) {
+        geographic_to_ps_with_convergence_and_scale(
+          a, e2, UPS_K0, *hemi, UPS_FN, UPS_FE, lat_rad, lon_rad, N, E, grid_convergence_rad, scale);
+      } else {
+        geographic_to_ps(
+          a, e2, UPS_K0, *hemi, UPS_FN, UPS_FE, lat_rad, lon_rad, N, E);
+      }
     } else {
-      geographic_to_ps_sphere(a, UPS_K0, *hemi, UPS_FN, UPS_FE, lat_rad, lon_rad, N, E);
+      if(grid_convergence_rad != nullptr and scale != nullptr) {
+        geographic_to_ps_sphere_with_convergence_and_scale(
+          a, UPS_K0, *hemi, UPS_FN, UPS_FE, lat_rad, lon_rad, N, E, grid_convergence_rad, scale);
+      } else {
+        geographic_to_ps_sphere(
+          a, UPS_K0, *hemi, UPS_FN, UPS_FE, lat_rad, lon_rad, N, E);
+      }
     }
     return 1;
   } 
