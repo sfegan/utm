@@ -63,6 +63,22 @@ The second set of functions apply the standard meridians, scale factor, false no
 
 ### Grid Conversions
 
-- `geographic_to_grid(double a, double e2, double lat_rad, double lon_rad, GridZone* zone, Hemisphere* hemi, double* N, double* E)`: Converts geographic coordinates to UTM/UPS grid coordinates. Automatically selects zone/hemisphere if set to AUTO. Returns 1 on success.
-- `grid_to_geographic(double a, double e2, GridZone zone, Hemisphere hemi, double N, double E, double* lat_rad, double* lon_rad)`: Converts UTM/UPS grid coordinates to geographic. Returns 1 on success.
+- `geographic_to_grid(double a, double e2, double lat_rad, double lon_rad, GridZone* zone, Hemisphere* hemi, double* N, double* E)`: Converts geographic coordinates to UTM/UPS grid coordinates. Automatically selects zone/hemisphere if set to AUTO. Returns 1 on success. The function takes the following parameters:
+  * `a`: semi-major axis of the ellipsoid in meters (input),
+  * `e2`: eccentricity squared (input),
+  * `lat_rad`: latitude in radians (input),
+  * `lon_rad`: longitude in radians (input),
+  * `zone`: pointer to the grid zone (input/output). Set to `GRID_AUTO` to automatically select the appropriate UTM zone based on longitude (1-60) or UPS (for latitudes >=84° or < -80°), and the selected zone will be returned in this variable. Can be set to a specific UTM zone (1-60) or `UPS_NORTH`/`UPS_SOUTH` to force conversion into that zone, allowing coordinates near zone boundaries to be mapped into a different zone,
+  * `hemi`: pointer to the hemisphere (input/output). Set to `HEMI_AUTO` to automatically select based on latitude (NORTH for >=0°, SOUTH for <0°), and the selected hemisphere will be returned in this variable. Can be set to `HEMI_NORTH` or `HEMI_SOUTH` to force a specific hemisphere,
+  * `N`: pointer to the calculated northing in meters (output),
+  * `E`: pointer to the calculated easting in meters (output).
+- `grid_to_geographic(double a, double e2, GridZone zone, Hemisphere hemi, double N, double E, double* lat_rad, double* lon_rad)`: Converts UTM/UPS grid coordinates to geographic. Returns 1 on success. The function takes the following parameters:
+  * `a`: semi-major axis of the ellipsoid in meters (input),
+  * `e2`: eccentricity squared (input),
+  * `zone`: grid zone (input),
+  * `hemi`: hemisphere (input),
+  * `N`: northing in meters (input),
+  * `E`: easting in meters (input),
+  * `lat_rad`: pointer to the calculated latitude in radians (output),
+  * `lon_rad`: pointer to the calculated longitude in radians (output).
 
