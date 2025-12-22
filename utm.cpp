@@ -671,16 +671,16 @@ int geographic_to_grid(double a, double e2,
     izone = (unsigned)((lon_rad+RAD(180))/RAD(6))+1;
     if((lat_rad>=RAD(56))&&(lat_rad<RAD(64))&& (lon_rad>=RAD(3))&&(lon_rad<RAD(12))) {
       izone=32;
-    }
-  } else if((lat_rad>=RAD(72))&&(lat_rad<RAD(84))&&(lon_rad>=RAD(0))) {
-    if(lon_rad<RAD(9)) {
-      izone=31;
-    } else if(lon_rad<RAD(21)) {
-      izone=33;
-    } else if(lon_rad<RAD(33)) {
-      izone=35;
-    } else if(lon_rad<RAD(42)) {
-      izone=37;
+    } else if((lat_rad>=RAD(72))&&(lat_rad<RAD(84))&&(lon_rad>=RAD(0))) {
+      if(lon_rad<RAD(9)) {
+        izone=31;
+      } else if(lon_rad<RAD(21)) {
+        izone=33;
+      } else if(lon_rad<RAD(33)) {
+        izone=35;
+      } else if(lon_rad<RAD(42)) {
+        izone=37;
+      }
     }
   }
 
