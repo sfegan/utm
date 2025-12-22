@@ -19,6 +19,10 @@ This will output a series of foward and backward conversions between latitude/lo
 
 ## Function reference
 
+A first set of functions are provided to convert between geographic coordinates and transverse Mercator (TM) or polar stereographic projections. For the TM case these can be used with respect to any reference meridian and scale factor, and applying any desired false northing and false easting. 
+
+The second set of functions apply the standard meridians, scale factor, false northing, and false easting as defined by DMATM 8358.2 to produce conversions between geographic coordinates and the UTM/UPS grids. In the forward conversion the user can allow the grid zone and hemisphere to be chosen automatically based on the geographic coordinates, or can impose any zone, allowing coordinates near the limits of one zone to be mapped into the coordinates of another, for example.
+
 ### Enums
 
 - `GridZone`: Enumerates UTM zones (1-60), UPS_NORTH, UPS_SOUTH, and GRID_AUTO for automatic selection.
@@ -26,23 +30,36 @@ This will output a series of foward and backward conversions between latitude/lo
 
 ### Spherical Projections
 
-- `geographic_to_tm_sphere(double R, double k0, double lon_mer, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E)`: Converts geographic coordinates (latitude, longitude in radians) to Transverse Mercator (TM) coordinates on a sphere. Parameters: R (sphere radius), k0 (scale factor), lon_mer (central meridian), FN/FE (false northing/easting).
-- `tm_to_geographic_sphere(double R, double k0, double lon_mer, double FN, double FE, double N, double E, double* lat_rad, double* lon_rad)`: Converts TM coordinates to geographic coordinates on a sphere.
-- `geographic_to_ps_sphere(double R, double k0, Hemisphere hemi, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E)`: Converts geographic coordinates to Polar Stereographic (PS) coordinates on a sphere.
-- `ps_to_geographic_sphere(double R, double k0, Hemisphere hemi, double FN, double FE, double N, double E, double* lat_rad, double* lon_rad)`: Converts PS coordinates to geographic coordinates on a sphere.
-
-### Ellipsoidal Projections (DMATM, obsoleted)
-
-- `dmatm_geographic_to_tm(double a, double e2, double k0, double lon_mer, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E)`: Converts geographic to TM using DMATM series expansion. Parameters: a (semi-major axis), e2 (eccentricity squared).
-- `dmatm_tm_to_geographic(double a, double e2, double k0, double lon_mer, double FN, double FE, double N, double E, double* lat_rad, double* lon_rad)`: Converts TM to geographic using DMATM series expansion.
+- `geographic_to_tm_sphere(double R, double k0, double lon_mer, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E)`: Converts geographic coordinates (latitude, longitude in radians) to Transverse Mercator (TM) coordinates on a sphere. The function takes the following parameters:
+  * `R`: sphere radius in meters (input),
+  * `k0`: scale factor (input),
+  * `lon_mer`: central meridian (input),
+  *  `FN` and `FE`: false northing and easting in meters (input),
+  * `lat_rad`: latitude in radians (input),
+  * `lon_rad`: longitude in radians (input),
+  * `N`: calculated northing in meters (output),
+  * `E`:calculated easting in meters (output).
+- `tm_to_geographic_sphere(double R, double k0, double lon_mer, double FN, double FE, double N, double E, double* lat_rad, double* lon_rad)`: Converts TM coordinates to geographic coordinates on a sphere. The parameters are as above, but with `N` and `E` as inputs, and `lat_rad` and `lon_rad` as output.
+- `geographic_to_ps_sphere(double R, double k0, Hemisphere hemi, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E)`: Converts geographic coordinates to Polar Stereographic (PS) coordinates on a sphere. Parameters as `geographic_to_tm_sphere`, but without `lon_mer` and with the addition of:
+  * `hemi`: the hemisphere with respect to which the projection will be done.
+- `ps_to_geographic_sphere(double R, double k0, Hemisphere hemi, double FN, double FE, double N, double E, double* lat_rad, double* lon_rad)`: Converts PS coordinates to geographic coordinates on a sphere. Parameters as above but with `N` and `E` as inputs, and `lat_rad` and `lon_rad` as output.
 
 ### Ellipsoidal Projections (Karney/Kawase, current)
 
-- `geographic_to_tm(double a, double e2, double k0, double lon_mer, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E)`: Converts geographic to TM using Karney/Kawase expansions.
-- `geographic_to_tm_with_convergence_and_scale(double a, double e2, double k0, double lon_mer, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E, double* grid_convergence_rad, double* scale)`: Converts geographic to TM and computes grid convergence (in radians) and scale factor.
-- `tm_to_geographic(double a, double e2, double k0, double lon_mer, double FN, double FE, double N, double E, double* lat_rad, double* lon_rad)`: Converts TM to geographic using Karney/Kawase expansions.
-- `geographic_to_ps(double a, double e2, double k0, Hemisphere hemi, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E)`: Converts geographic to PS on an ellipsoid.
-- `ps_to_geographic(double a, double e2, double k0, Hemisphere hemi, double FN, double FE, double N, double E, double* lat_rad, double* lon_rad)`: Converts PS to geographic on an ellipsoid.
+- `geographic_to_tm(double a, double e2, double k0, double lon_mer, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E)`: Converts geographic to TM using Karney/Kawase expansions. Parameters as in the case of `geographic_to_tm_sphere` but with `R` replaced by: 
+  * `a`: semi-major axis in meters, and 
+  * `e2`: eccentricity squared.
+- `geographic_to_tm_with_convergence_and_scale(double a, double e2, double k0, double lon_mer, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E, double* grid_convergence_rad, double* scale)`: Converts geographic to TM and computes the grid convergence (in radians) and scale factor. The parrameters to the function are as above, with the addition of the following outputs:
+  * `grid_convergence_rad`: angle between lines of constant easting and true North in radians at the chosen point (output), and
+  * `scale`: scale on the grid at the chosen point (output).
+- `tm_to_geographic(double a, double e2, double k0, double lon_mer, double FN, double FE, double N, double E, double* lat_rad, double* lon_rad)`: Converts TM to geographic using Karney/Kawase expansions. Parameters as in `geographic_to_tm` with `N` and `E` as inputs, and `lat_rad` and `lon_rad` as output.
+- `geographic_to_ps(double a, double e2, double k0, Hemisphere hemi, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E)`: Converts geographic to PS on an ellipsoid using the DMATM algorithm.
+- `ps_to_geographic(double a, double e2, double k0, Hemisphere hemi, double FN, double FE, double N, double E, double* lat_rad, double* lon_rad)`: Converts PS to geographic on an ellipsoid using the DMATM algorithm.
+
+### Ellipsoidal Projections (DMATM, obsoleted)
+
+- `dmatm_geographic_to_tm(double a, double e2, double k0, double lon_mer, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E)`: Converts geographic to TM on the ellipse, using DMATM series expansion. Parameters as in the case of `geographic_to_tm`.
+- `dmatm_tm_to_geographic(double a, double e2, double k0, double lon_mer, double FN, double FE, double N, double E, double* lat_rad, double* lon_rad)`: Converts TM to geographic using DMATM series expansion. Parameters as in `tm_to_geographic`.
 
 ### Grid Conversions
 
