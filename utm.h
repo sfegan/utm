@@ -8,15 +8,15 @@
  *
  * 2025-12-21: The primary conversion functions have been replaced with
  * versions based on Karney 2011 and Kawase 2011, 2013. The original
- * version based on the DMA  algorithms has been obsoleted but retained for
+ * version based on the DMA algorithms has been obsoleted but retained for
  * reference.
  *
  * These conversion routines are a C/C++ implementation of the algorithms 
  * described in the Defense Mapping Agency Technical Manual (DMATM) 8358.2
  * which is available from the US National Geospatial Mapping Agency.
- * At time of writing it could be downloaded at:
+ * At time of writing (2025) it could be downloaded at:
  *
- * http://earth-info.nga.mil/GandG/coordsys/csat_pubs.html
+ * https://apps.dtic.mil/sti/tr/pdf/ADA266497.pdf
  *
  * A number of alternative conversion routines are available on the Web. Those 
  * that I've seen are (ultimately) based on John Snyder's algorithm, presented
