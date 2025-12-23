@@ -258,7 +258,7 @@ int main()
   E = 700000.00;
 
   zone = UTM_ZONE_30;
-  grid_to_geographic(a, e2, zone, HEMI_NORTH, N, E, &lat_rad, &lon_rad);
+  grid_to_geographic(a, e2, zone, HEMI_SOUTH, N, E, &lat_rad, &lon_rad);
   write_entry(std::cout, lat_rad, lon_rad, zone, N, E);
 
   N = 4000329.42;
