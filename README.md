@@ -4,18 +4,18 @@ This repository provides a set of C++ routines to convert coordinates between la
 
 __Prior to 2025-12-21__ these were based on the series expansion provided by the US Defense Mapping Agency Technical Manual 8358.2.
 
-__After 2025-12-21__ the UTM routines use an implementation based on the expansions of [Karney 2011](https://arxiv.org/abs/1002.1417), [Kawase 2011](http://www.gsi.go.jp/common/000062452.pdf), and [Kawase 2013](http://www.gsi.go.jp/common/000065826.pdf). The original DMATM implementation is also retained for reference.
+__After 2025-12-21__ the UTM routines use an implementation based on the expansions of [Karney 2011](https://arxiv.org/abs/1002.1417), [Kawase 2011](http://www.gsi.go.jp/common/000062452.pdf), and [Kawase 2013](http://www.gsi.go.jp/common/000065826.pdf). The original DMATM implementation is also present for reference.
 
-## Bulding and testing
+## Building and testing
 
-The code for the transformations is contained in the routines `utm.cpp` and `datum.cpp`. A test function is also included which can be compiled by seetting a flag.
+The code for the transformations is contained in the routines `utm.cpp` and `datum.cpp`. A test function is also included which can be compiled by setting a flag.
 
-To build the UTM test suite on Linux or MacOS use:
+To build the UTM test suite on Linux or macOS use:
 
     g++ -DELLIPSE_TEST_MAIN -o ellipse_test utm.cpp datum.cpp -lm
     ./ellipse_test
 
-This will output a series of foward and backward conversions between latitude/longitude and the UTM grid, reproducing table 2-11 of DMATM 8358.2 (which is included in this repository).
+This will output a series of forward and backward conversions between latitude/longitude and the UTM grid, reproducing table 2-11 of DMATM 8358.2 (which is included in this repository).
 
 ## Function reference
 
@@ -38,7 +38,7 @@ The second set of functions apply the standard meridians, scale factor, false no
   * `lat_rad`: latitude in radians (input),
   * `lon_rad`: longitude in radians (input),
   * `N`: calculated northing in meters (output),
-  * `E`:calculated easting in meters (output).
+  * `E`: calculated easting in meters (output).
 - `geographic_to_tm_sphere_with_convergence_and_scale(double R, double k0, double lon_mer, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E, double* grid_convergence_rad, double* scale)`: Converts geographic coordinates to TM coordinates on a sphere and computes grid convergence and scale. Parameters as above, with additional outputs:
   * `grid_convergence_rad`: angle between lines of constant easting and true North in radians (output),
   * `scale`: scale on the grid (output).
@@ -48,17 +48,17 @@ The second set of functions apply the standard meridians, scale factor, false no
 - `geographic_to_ps_sphere_with_convergence_and_scale(double R, double k0, Hemisphere hemi, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E, double* grid_convergence_rad, double* scale)`: Converts geographic coordinates to PS coordinates on a sphere and computes grid convergence and scale. Parameters as above, with additional outputs:
   * `grid_convergence_rad`: angle between lines of constant easting and true North in radians (output),
   * `scale`: scale on the grid (output).
-- `ps_to_geographic_sphere(double R, double k0, Hemisphere hemi, double FN, double FE, double N, double E, double* lat_rad, double* lon_rad)`: Converts PS coordinates to geographic coordinates on a sphere. Parameters as above but with `N` and `E` as inputs, and `lat_rad` and `lon_rad` as output.
+- `ps_to_geographic_sphere(double R, double k0, Hemisphere hemi, double FN, double FE, double N, double E, double* lat_rad, double* lon_rad)`: Converts PS coordinates to geographic coordinates on a sphere. Parameters as above but with `N` and `E` as inputs, and `lat_rad` and `lon_rad` as outputs.
 
 ### Ellipsoidal Projections (Karney/Kawase, current)
 
 - `geographic_to_tm(double a, double e2, double k0, double lon_mer, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E)`: Converts geographic to TM using Karney/Kawase expansions. Parameters as in the case of `geographic_to_tm_sphere` but with `R` replaced by: 
   * `a`: semi-major axis in meters, and 
   * `e2`: eccentricity squared.
-- `geographic_to_tm_with_convergence_and_scale(double a, double e2, double k0, double lon_mer, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E, double* grid_convergence_rad, double* scale)`: Converts geographic to TM and computes the grid convergence (in radians) and scale factor. The parrameters to the function are as above, with the addition of the following outputs:
+- `geographic_to_tm_with_convergence_and_scale(double a, double e2, double k0, double lon_mer, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E, double* grid_convergence_rad, double* scale)`: Converts geographic to TM and computes the grid convergence (in radians) and scale factor. The parameters to the function are as above, with the addition of the following outputs:
   * `grid_convergence_rad`: angle between lines of constant easting and true North in radians at the chosen point (output), and
   * `scale`: scale on the grid at the chosen point (output).
-- `tm_to_geographic(double a, double e2, double k0, double lon_mer, double FN, double FE, double N, double E, double* lat_rad, double* lon_rad)`: Converts TM to geographic using Karney/Kawase expansions. Parameters as in `geographic_to_tm` with `N` and `E` as inputs, and `lat_rad` and `lon_rad` as output.
+- `tm_to_geographic(double a, double e2, double k0, double lon_mer, double FN, double FE, double N, double E, double* lat_rad, double* lon_rad)`: Converts TM to geographic using Karney/Kawase expansions. Parameters as in `geographic_to_tm` with `N` and `E` as inputs, and `lat_rad` and `lon_rad` as outputs.
 - `geographic_to_ps(double a, double e2, double k0, Hemisphere hemi, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E)`: Converts geographic to PS on an ellipsoid using the DMATM algorithm.
 - `geographic_to_ps_with_convergence_and_scale(double a, double e2, double k0, Hemisphere hemi, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E, double* grid_convergence_rad, double* scale)`: Converts geographic to PS on an ellipsoid and computes grid convergence and scale. Parameters as above, with additional outputs:
   * `grid_convergence_rad`: angle between lines of constant easting and true North in radians (output),
@@ -81,8 +81,8 @@ The second set of functions apply the standard meridians, scale factor, false no
   * `hemi`: pointer to the hemisphere (input/output). Set to `HEMI_AUTO` to automatically select based on latitude (NORTH for >=0°, SOUTH for <0°), and the selected hemisphere will be returned in this variable. Can be set to `HEMI_NORTH` or `HEMI_SOUTH` to force a specific hemisphere,
   * `N`: pointer to the calculated northing in meters (output),
   * `E`: pointer to the calculated easting in meters (output).
-  * `grid_convergence_rad`: optional pointer to the calculated grid convergence in radians (output). Both this and `scale` must be non-null for convergence and scale to be computed,
-  * `scale`: optional pointer to the calculated scale factor (output). Both this and `grid_convergence_rad` must be non-null for convergence and scale to be computed.
+  * `grid_convergence_rad`: optional pointer to the grid convergence in radians (output). Both this and `scale` must be non-null for convergence and scale to be computed,
+  * `scale`: optional pointer to the scale factor (output). Both this and `grid_convergence_rad` must be non-null for convergence and scale to be computed.
 - `grid_to_geographic(double a, double e2, GridZone zone, Hemisphere hemi, double N, double E, double* lat_rad, double* lon_rad)`: Converts UTM/UPS grid coordinates to geographic. Returns 1 on success. The function takes the following parameters:
   * `a`: semi-major axis of the ellipsoid in meters (input),
   * `e2`: eccentricity squared (input),
