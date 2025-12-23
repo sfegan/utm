@@ -211,7 +211,7 @@ int main()
 
   zone = UTM_ZONE_48;
   grid_to_geographic(a, e2, zone, HEMI_NORTH, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, zone, N, E, gc_rad, scale);
+  write_entry(std::cout, lat_rad, lon_rad, zone, N, E);
 
 
   N = 3322824.08;
@@ -219,7 +219,7 @@ int main()
 
   zone = UTM_ZONE_47;
   grid_to_geographic(a, e2, zone, HEMI_NORTH, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, zone, N, E, gc_rad, scale);
+  write_entry(std::cout, lat_rad, lon_rad, zone, N, E);
 
   // ------
   // ID = 5
