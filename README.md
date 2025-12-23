@@ -15,7 +15,7 @@ To build the UTM test suite on Linux or macOS use:
     g++ -o test_ellipse test_ellipse.cpp datum.cpp utm.cpp
     ./test_ellipse
 
-This will output a series of forward and backward conversions between latitude/longitude and the UTM grid, reproducing table 2-11 of DMATM 8358.2 (which is included in this repository).
+This will output a series of forward and backward conversions between latitude/longitude and the UTM grid, reproducing tables 2-11 and 3-7 of DMATM 8358.2, [which is included in this repository](https://github.com/sfegan/utm/blob/main/ADA266497.pdf).
 
 ## Function reference
 
