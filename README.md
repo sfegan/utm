@@ -59,22 +59,22 @@ The second set of functions apply the standard meridians, scale factor, false no
   * `scale`: scale on the grid (output).
 - `ps_to_geographic_sphere(double R, double k0, Hemisphere hemi, double FN, double FE, double N, double E, double* lat_rad, double* lon_rad)`: Converts PS coordinates to geographic coordinates on a sphere. Parameters as above but with `N` and `E` as inputs, and `lat_rad` and `lon_rad` as outputs.
 
-### Ellipsoidal Projections (Karney/Kawase, current)
+### Ellipsoidal Projections
 
-- `geographic_to_tm(double a, double e2, double k0, double lon_mer, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E)`: Converts geographic to TM using Karney/Kawase expansions. Parameters as in the case of `geographic_to_tm_sphere` but with `R` replaced by: 
+- `geographic_to_tm(double a, double e2, double k0, double lon_mer, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E)`: Converts geographic to TM on the ellipsoid using the Karney/Kawase expansions. Parameters as in the case of `geographic_to_tm_sphere` but with `R` replaced by: 
   * `a`: semi-major axis in meters, and 
   * `e2`: eccentricity squared.
-- `geographic_to_tm_with_convergence_and_scale(double a, double e2, double k0, double lon_mer, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E, double* grid_convergence_rad, double* scale)`: Converts geographic to TM and computes the grid convergence (in radians) and scale factor. The parameters to the function are as above, with the addition of the following outputs:
+- `geographic_to_tm_with_convergence_and_scale(double a, double e2, double k0, double lon_mer, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E, double* grid_convergence_rad, double* scale)`: Converts geographic to TM on the ellipsoid using the Karney/Kawase expansions and computes the grid convergence (in radians) and scale factor. The parameters to the function are as above, with the addition of the following outputs:
   * `grid_convergence_rad`: angle between lines of constant easting and true North in radians at the chosen point (output), and
   * `scale`: scale on the grid at the chosen point (output).
-- `tm_to_geographic(double a, double e2, double k0, double lon_mer, double FN, double FE, double N, double E, double* lat_rad, double* lon_rad)`: Converts TM to geographic using Karney/Kawase expansions. Parameters as in `geographic_to_tm` with `N` and `E` as inputs, and `lat_rad` and `lon_rad` as outputs.
-- `geographic_to_ps(double a, double e2, double k0, Hemisphere hemi, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E)`: Converts geographic to PS on an ellipsoid using the DMATM algorithm.
-- `geographic_to_ps_with_convergence_and_scale(double a, double e2, double k0, Hemisphere hemi, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E, double* grid_convergence_rad, double* scale)`: Converts geographic to PS on an ellipsoid and computes grid convergence and scale. Parameters as above, with additional outputs:
+- `tm_to_geographic(double a, double e2, double k0, double lon_mer, double FN, double FE, double N, double E, double* lat_rad, double* lon_rad)`: Converts TM to geographic on the elliposid using the Karney/Kawase expansions. Parameters as in `geographic_to_tm` with `N` and `E` as inputs, and `lat_rad` and `lon_rad` as outputs.
+- `geographic_to_ps(double a, double e2, double k0, Hemisphere hemi, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E)`: Converts geographic to PS on the ellipsoid using the DMATM algorithm.
+- `geographic_to_ps_with_convergence_and_scale(double a, double e2, double k0, Hemisphere hemi, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E, double* grid_convergence_rad, double* scale)`: Converts geographic to PS on the ellipsoid using the DMATM algorithm and computes grid convergence and scale. Parameters as above, with additional outputs:
   * `grid_convergence_rad`: angle between lines of constant easting and true North in radians (output),
   * `scale`: scale on the grid (output).
 - `ps_to_geographic(double a, double e2, double k0, Hemisphere hemi, double FN, double FE, double N, double E, double* lat_rad, double* lon_rad)`: Converts PS to geographic on an ellipsoid using the DMATM algorithm.
 
-### Ellipsoidal Projections (DMATM, obsoleted)
+### Ellipsoidal Projections (obsoleted DMATM expansions)
 
 - `dmatm_geographic_to_tm(double a, double e2, double k0, double lon_mer, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E)`: Converts geographic to TM on the ellipse, using DMATM series expansion. Parameters as in the case of `geographic_to_tm`.
 - `dmatm_tm_to_geographic(double a, double e2, double k0, double lon_mer, double FN, double FE, double N, double E, double* lat_rad, double* lon_rad)`: Converts TM to geographic using DMATM series expansion. Parameters as in `tm_to_geographic`.
