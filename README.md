@@ -25,7 +25,7 @@ The second set of functions apply the standard meridians, scale factor, false no
 
 ### Enums
 
-- `GridZone`: Enumerates UTM zones (1-60), UPS_NORTH, UPS_SOUTH, and GRID_AUTO for automatic selection.
+- `GridZone`: Enumerates UTM zones (UTM_ZONE_1 to UTM_ZONE_60), UPS_NORTH, UPS_SOUTH, and GRID_AUTO for automatic selection.
 - `Hemisphere`: Enumerates HEMI_NORTH, HEMI_SOUTH, and HEMI_AUTO for automatic selection.
 
 ### Spherical Projections
