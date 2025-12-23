@@ -52,11 +52,11 @@ The second set of functions apply the standard meridians, scale factor, false no
   * `grid_convergence_rad`: angle between lines of constant easting and true North in radians (output),
   * `scale`: scale on the grid (output).
 - `tm_to_geographic_sphere(double R, double k0, double lon_mer, double FN, double FE, double N, double E, double* lat_rad, double* lon_rad)`: Converts TM coordinates to geographic coordinates on a sphere. The parameters are as above, but with `N` and `E` as inputs, and `lat_rad` and `lon_rad` as outputs.
-- `geographic_to_ps_sphere(double R, double k0, Hemisphere hemi, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E)`: Converts geographic coordinates to Polar Stereographic (PS) coordinates on a sphere. Parameters as `geographic_to_tm_sphere`, but without `lon_mer` and with the addition of:
-  * `hemi`: the hemisphere with respect to which the projection will be done.
 
 ### Spherical Projections (Polar stereographic)
 
+- `geographic_to_ps_sphere(double R, double k0, Hemisphere hemi, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E)`: Converts geographic coordinates to Polar Stereographic (PS) coordinates on a sphere. Parameters as `geographic_to_tm_sphere`, but without `lon_mer` and with the addition of:
+  * `hemi`: the hemisphere with respect to which the projection will be done.
 - `geographic_to_ps_sphere_with_convergence_and_scale(double R, double k0, Hemisphere hemi, double FN, double FE, double lat_rad, double lon_rad, double* N, double* E, double* grid_convergence_rad, double* scale)`: Converts geographic coordinates to PS coordinates on a sphere and computes grid convergence and scale. Parameters as above, with additional outputs:
   * `grid_convergence_rad`: angle between lines of constant easting and true North in radians (output),
   * `scale`: scale on the grid (output).
