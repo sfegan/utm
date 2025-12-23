@@ -29,8 +29,8 @@ The second set of functions apply the standard meridians, scale factor, false no
     * `UTM_ZONE_1` to `UTM_ZONE_60`: Specific UTM zones (zone 1 covers -180° to -174°, zone 60 covers 174° to 180°).
     * `UPS_NORTH`: Polar Stereographic projection for the North Pole.
     * `UPS_SOUTH`: Polar Stereographic projection for the South Pole.
-    * `GRID_AUTO`: Automatically selects the appropriate grid zone and projection based on latitude and longitude. For latitudes ≥84° or <-80°, selects UPS; otherwise selects the appropriate UTM zone (1-60) based on longitude, with special handling for Norway and Svalbard.
-    * `UTM_ZONE_AUTO`: Automatically selects the appropriate UTM zone (1-60) based on longitude alone, ignoring latitude. With this option the polar regions are mapped onto the various UTM zones.
+    * `GRID_AUTO`: Automatically selects the appropriate grid zone and projection based on latitude and longitude. For latitudes ≥84° or <-80°, selects UPS; otherwise selects the appropriate UTM zone (1-60) based on longitude, with special handling for Norway and Svalbard. This is the recommended setting to convert geographic coordinates to the grid in conformance to DMATM 8358.2.
+    * `UTM_ZONE_AUTO`: Automatically selects the appropriate UTM zone (1-60) based on longitude alone, ignoring latitude. With this option the polar regions are mapped onto the various UTM zones. This option is primarily intended for internal use but can be selected by the user if desired.
 
 - `Hemisphere`: Enumerates hemisphere options:
     * `HEMI_NORTH`: Northern Hemisphere.
