@@ -95,20 +95,30 @@ std::string radToDMSString(double rad,
 }
 
 void write_entry(std::ostream& stream,
-		 double lat, double lon, double N, double E)
+		 double lat, double lon, GridZone zone, double N, double E)
 {
+  std::string zone_str;
+  if(zone==UPS_NORTH)zone_str="NP";
+  else if(zone==UPS_SOUTH)zone_str="SP";
+  else zone_str=std::to_string((unsigned)zone);
   stream << "LAT: " << radToDMSString(lat) << "   LONG: "
 	 << radToDMSString(lon) << "   " << std::fixed
+   << "Z: " << std::setw(2) << zone_str << "   "
 	 << "N: " << std::setw(10) << std::setprecision(2) << N << "   " 
 	 << "E: " << std::setw(9) << std::setprecision(2) << E 
 	 << std::endl;
 }
 
 void write_entry(std::ostream& stream,
-		 double lat, double lon, double N, double E, double gc_rad, double scale)
+		 double lat, double lon, GridZone zone, double N, double E, double gc_rad, double scale)
 {
+  std::string zone_str;
+  if(zone==UPS_NORTH)zone_str="NP";
+  else if(zone==UPS_SOUTH)zone_str="SP";
+  else zone_str=std::to_string((unsigned)zone);
   stream << "LAT: " << radToDMSString(lat) << "   LONG: "
 	 << radToDMSString(lon) << "   " << std::fixed
+   << "Z: " << std::setw(2) << zone_str << "   "
 	 << "N: " << std::setw(10) << std::setprecision(2) << N << "   " 
 	 << "E: " << std::setw(9) << std::setprecision(2) << E << "   "
    << "C: " << radToDMSString(gc_rad) << "   "
@@ -152,7 +162,7 @@ int main()
   hemi = HEMI_NORTH;
 
   geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E, &gc_rad, &scale);
-  write_entry(std::cout, lat_rad, lon_rad, N, E, gc_rad, scale);
+  write_entry(std::cout, lat_rad, lon_rad, zone, N, E, gc_rad, scale);
 
   // ------
   // ID = 2
@@ -163,12 +173,12 @@ int main()
   zone = UTM_ZONE_47;
 
   geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E, &gc_rad, &scale);
-  write_entry(std::cout, lat_rad, lon_rad, N, E, gc_rad, scale);
+  write_entry(std::cout, lat_rad, lon_rad, zone, N, E, gc_rad, scale);
 
   zone = UTM_ZONE_48;
 
   geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E, &gc_rad, &scale);
-  write_entry(std::cout, lat_rad, lon_rad, N, E, gc_rad, scale);
+  write_entry(std::cout, lat_rad, lon_rad, zone, N, E, gc_rad, scale);
 
   // ------
   // ID = 3
@@ -179,12 +189,12 @@ int main()
   zone = UTM_ZONE_12;
 
   geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E, &gc_rad, &scale);
-  write_entry(std::cout, lat_rad, lon_rad, N, E, gc_rad, scale);
+  write_entry(std::cout, lat_rad, lon_rad, zone, N, E, gc_rad, scale);
 
   zone = UTM_ZONE_11;
 
   geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E, &gc_rad, &scale);
-  write_entry(std::cout, lat_rad, lon_rad, N, E, gc_rad, scale);
+  write_entry(std::cout, lat_rad, lon_rad, zone, N, E, gc_rad, scale);
 
   std::cout << std::endl;
 
@@ -199,15 +209,17 @@ int main()
   N = 3322824.35;
   E = 210577.93;
 
-  grid_to_geographic(a, e2, UTM_ZONE_48, HEMI_NORTH, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
+  zone = UTM_ZONE_48;
+  grid_to_geographic(a, e2, zone, HEMI_NORTH, N, E, &lat_rad, &lon_rad);
+  write_entry(std::cout, lat_rad, lon_rad, zone, N, E, gc_rad, scale);
 
 
   N = 3322824.08;
   E = 789411.59;
 
-  grid_to_geographic(a, e2, UTM_ZONE_47, HEMI_NORTH, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
+  zone = UTM_ZONE_47;
+  grid_to_geographic(a, e2, zone, HEMI_NORTH, N, E, &lat_rad, &lon_rad);
+  write_entry(std::cout, lat_rad, lon_rad, zone, N, E, gc_rad, scale);
 
   // ------
   // ID = 5
@@ -216,15 +228,17 @@ int main()
   N = 1000000.00;
   E = 200000.00;
 
-  grid_to_geographic(a, e2, UTM_ZONE_31, HEMI_NORTH, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
+  zone = UTM_ZONE_31;
+  grid_to_geographic(a, e2, zone, HEMI_NORTH, N, E, &lat_rad, &lon_rad);
+  write_entry(std::cout, lat_rad, lon_rad, zone, N, E);
 
   N = 1000491.75;
   E = 859739.88;
 
-  grid_to_geographic(a, e2, UTM_ZONE_30, HEMI_NORTH, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
-  
+  zone = UTM_ZONE_30;
+  grid_to_geographic(a, e2, zone, HEMI_NORTH, N, E, &lat_rad, &lon_rad);
+  write_entry(std::cout, lat_rad, lon_rad, zone, N, E);
+
   // ------
   // ID = 6
   // ------
@@ -232,8 +246,9 @@ int main()
   N = 9000000.00;
   E = 500000.00;
 
-  grid_to_geographic(a, e2, UTM_ZONE_43, HEMI_NORTH, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
+  zone = UTM_ZONE_43;
+  grid_to_geographic(a, e2, zone, HEMI_NORTH, N, E, &lat_rad, &lon_rad);
+  write_entry(std::cout, lat_rad, lon_rad, zone, N, E);
 
   // ------
   // ID = 7
@@ -242,14 +257,16 @@ int main()
   N = 4000000.00;
   E = 700000.00;
 
-  grid_to_geographic(a, e2, UTM_ZONE_30, HEMI_SOUTH, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
+  zone = UTM_ZONE_30;
+  grid_to_geographic(a, e2, zone, HEMI_NORTH, N, E, &lat_rad, &lon_rad);
+  write_entry(std::cout, lat_rad, lon_rad, zone, N, E);
 
   N = 4000329.42;
   E = 307758.89;
 
-  grid_to_geographic(a, e2, UTM_ZONE_31, HEMI_SOUTH, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
+  zone = UTM_ZONE_31;
+  grid_to_geographic(a, e2, zone, HEMI_SOUTH, N, E, &lat_rad, &lon_rad);
+  write_entry(std::cout, lat_rad, lon_rad, zone, N, E);
 
   std::cout << std::endl;
   
@@ -271,7 +288,7 @@ int main()
   zone = UPS_NORTH;
 
   geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E, &gc_rad, &scale);
-  write_entry(std::cout, lat_rad, lon_rad, N, E, gc_rad, scale);
+  write_entry(std::cout, lat_rad, lon_rad, zone, N, E, gc_rad, scale);
 
   // ------
   // ID = 2
@@ -282,7 +299,7 @@ int main()
   zone = UPS_NORTH;
 
   geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E, &gc_rad, &scale);
-  write_entry(std::cout, lat_rad, lon_rad, N, E, gc_rad, scale);
+  write_entry(std::cout, lat_rad, lon_rad, zone, N, E, gc_rad, scale);
 
   // ------
   // ID = 3
@@ -293,7 +310,7 @@ int main()
   zone = UPS_SOUTH;
 
   geographic_to_grid(a, e2, lat_rad, lon_rad, &zone, &hemi, &N, &E, &gc_rad, &scale);
-  write_entry(std::cout, lat_rad, lon_rad, N, E, gc_rad, scale);
+  write_entry(std::cout, lat_rad, lon_rad, zone, N, E, gc_rad, scale);
 
   std::cout << std::endl;
 
@@ -308,8 +325,9 @@ int main()
   N = 2426773.60;
   E = 1530125.78;
 
-  grid_to_geographic(a, e2, UPS_NORTH, HEMI_AUTO, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
+  zone = UPS_NORTH;
+  grid_to_geographic(a, e2, zone, HEMI_AUTO, N, E, &lat_rad, &lon_rad);
+  write_entry(std::cout, lat_rad, lon_rad, zone, N, E);
 
   // ------
   // ID = 5
@@ -318,8 +336,9 @@ int main()
   N = 632668.43;
   E = 3320416.75;
 
-  grid_to_geographic(a, e2, UPS_NORTH, HEMI_AUTO, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
+  zone = UPS_NORTH;
+  grid_to_geographic(a, e2, zone, HEMI_AUTO, N, E, &lat_rad, &lon_rad);
+  write_entry(std::cout, lat_rad, lon_rad, zone, N, E);
 
   // ------
   // ID = 6
@@ -328,6 +347,7 @@ int main()
   N = 1500000.00;
   E = 2500000.00;
 
-  grid_to_geographic(a, e2, UPS_SOUTH, HEMI_AUTO, N, E, &lat_rad, &lon_rad);
-  write_entry(std::cout, lat_rad, lon_rad, N, E);
+  zone = UPS_SOUTH;
+  grid_to_geographic(a, e2, zone, HEMI_AUTO, N, E, &lat_rad, &lon_rad);
+  write_entry(std::cout, lat_rad, lon_rad, zone, N, E);
 }
