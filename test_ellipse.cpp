@@ -95,21 +95,6 @@ std::string radToDMSString(double rad,
 }
 
 void write_entry(std::ostream& stream, bool fwd, 
-		 double lat, double lon, GridZone zone, double N, double E)
-{
-  std::string zone_str;
-  if(zone==UPS_NORTH)zone_str="NP";
-  else if(zone==UPS_SOUTH)zone_str="SP";
-  else zone_str=std::to_string((unsigned)zone);
-  stream << "LAT: " << radToDMSString(lat) << "  LON: "
-	 << radToDMSString(lon) << (fwd ? " --> " : " <-- ") << std::fixed
-   << "Z: " << std::setw(2) << zone_str << "  "
-	 << "N: " << std::setw(10) << std::setprecision(2) << N << "  " 
-	 << "E: " << std::setw(9) << std::setprecision(2) << E 
-	 << std::endl;
-}
-
-void write_entry(std::ostream& stream, bool fwd, 
 		 double lat, double lon, GridZone zone, double N, double E, double gc_rad, double scale)
 {
   std::string zone_str;
